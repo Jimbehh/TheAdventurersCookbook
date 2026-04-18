@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#2a1810"/>
+<meta name="apple-mobile-web-app-title" content="Cookbook"/>
 <title>The Adventurer's Cookbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -562,16 +566,101 @@
 
   /* ═══ RESPONSIVE ═══ */
   @media (max-width: 768px) {
-    body { padding: 8px; }
-    .book-spread { flex-direction: column; }
-    .book-spine { width: 100%; height: 16px; }
-    .book-spine::after { top: 50%; left: 10%; right: 10%; bottom: auto; width: auto; height: 2px; transform: translateY(-50%); }
-    .page { padding: 32px 24px; }
+    body {
+      padding: 0;
+      background-attachment: scroll;
+    }
+    .book { max-width: 100%; }
+    .book-spread {
+      flex-direction: column;
+      min-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .book-spine { display: none; }
+    .page {
+      padding: 24px 18px;
+      flex: initial;
+    }
     .view.active { flex-direction: column; }
-    .page-left { border-right: none; border-bottom: 1px solid var(--parchment-dark); box-shadow: none; }
-    .page-right { box-shadow: none; }
+    .page-left {
+      border-right: none;
+      border-bottom: none;
+      box-shadow: none;
+    }
+    .page-right {
+      box-shadow: none;
+      border-top: 1px solid var(--parchment-dark);
+    }
     .corner-ornament { display: none; }
-    .page-border { inset: 8px; }
+    .page-border { display: none; }
+
+    /* Bigger, cooking-friendly typography */
+    .ing-name { font-size: 17px; line-height: 1.4; }
+    .ing-qty { font-size: 14px; }
+    .step-text { font-size: 17px; line-height: 1.75; }
+    .step-num { font-size: 36px; }
+    .method-step { padding-left: 44px; margin-bottom: 28px; }
+    .step-text strong { font-size: 12px; padding: 3px 8px; }
+
+    /* Bigger tap targets (Apple HIG: min 44px) */
+    .btn-accent, .btn-tome {
+      padding: 14px 20px;
+      font-size: 12px;
+      min-height: 48px;
+    }
+    .btn-subtle { padding: 10px 14px; min-height: 40px; }
+    .srv-btn { width: 40px; height: 40px; font-size: 20px; }
+    .planner-check, .shop-check { width: 26px; height: 26px; }
+    .planner-entry { padding: 16px; }
+    .shop-item { padding: 14px 0; }
+    .tome-input, .tome-select, .tome-textarea {
+      font-size: 16px; /* prevents iOS zoom on focus */
+      padding: 14px;
+    }
+    input[type="range"] { height: 36px; }
+
+    /* Faster tap response, no blue flash */
+    button, .index-entry, .planner-entry, .shop-check {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* Full-screen modals on mobile */
+    .modal-overlay { padding: 0; }
+    .modal-scroll {
+      max-height: 100vh;
+      height: 100vh;
+      max-width: 100vw;
+      border: none;
+      padding: 28px 20px;
+    }
+
+    /* Sticky servings control on detail view */
+    .servings-sticky {
+      position: sticky;
+      top: 0;
+      background: var(--parchment);
+      z-index: 10;
+      margin: -24px -18px 16px -18px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--gold-dark);
+    }
+
+    /* List view: tighter index entries */
+    .index-entry { padding: 18px 0; }
+    .index-name { font-size: 18px; }
+    .index-detail { font-size: 14px; }
+
+    /* Detail title page smaller */
+    .page h1 { font-size: 28px !important; }
+  }
+
+  /* Very narrow phones (iPhone SE etc) */
+  @media (max-width: 380px) {
+    .page { padding: 20px 14px; }
+    .step-text { font-size: 16px; }
+    .ing-name { font-size: 16px; }
   }
 </style>
 </head>
@@ -758,7 +847,7 @@
         <hr class="ruled-line"/>
 
         <!-- Servings -->
-        <div style="margin-bottom:20px;">
+        <div class="servings-sticky" style="margin-bottom:20px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
             <span class="section-header" style="margin-bottom:0;">Serves</span>
             <span id="detail-servings-val" style="font-family:'Cinzel Decorative',cursive; font-size:28px; color:var(--accent);"></span>
@@ -1164,8 +1253,23 @@ function showView(name) {
   currentView = name;
   document.getElementById('view-list').classList.toggle('active', name === 'list');
   document.getElementById('view-detail').classList.toggle('active', name === 'detail');
-  if (name === 'list') { renderRecipes(); updateSidebarCount(); }
+  if (name === 'list') { renderRecipes(); updateSidebarCount(); releaseWakeLock(); }
+  if (name === 'detail') { requestWakeLock(); }
 }
+
+// ─── Screen Wake Lock (keep phone awake while cooking) ───────
+var wakeLock = null;
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+  }
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release(); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && currentView === 'detail') requestWakeLock();
+});
 
 function updateSidebarCount() {
   var el = document.getElementById('sidebar-count');
