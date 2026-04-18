@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Adventurer's Cookbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --parchment: #f4e4c1;
+    --parchment-light: #faf0dc;
+    --parchment-dark: #e8d5a3;
+    --leather: #5c3d2e;
+    --leather-dark: #3d2b1f;
+    --leather-light: #8b6914;
+    --ink: #2a1810;
+    --ink-light: #5a4a3a;
+    --ink-faded: #8a7a6a;
+    --accent: #8b1a1a;
+    --accent-light: #b44444;
+    --gold: #c9a84c;
+    --gold-dark: #a08030;
+    --gold-light: #e0c878;
+    --forest: #2d5a27;
+    --forest-light: #4a8042;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  body {
+    font-family: 'Crimson Text', serif;
+    background: #2a1810;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(92,61,46,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(92,61,46,0.2) 0%, transparent 60%);
+  }
+
+  h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
+
+  /* ═══ THE BOOK ═══ */
+  .book {
+    width: 100%;
+    max-width: 1100px;
+    min-height: 85vh;
+    position: relative;
+    perspective: 2000px;
+  }
+
+  .book-spread {
+    display: flex;
+    min-height: 85vh;
+    border-radius: 8px;
+    box-shadow:
+      0 0 40px rgba(0,0,0,0.5),
+      0 0 100px rgba(0,0,0,0.3),
+      inset 0 0 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  /* ═══ BOOK SPINE ═══ */
+  .book-spine {
+    width: 40px;
+    background: linear-gradient(90deg, var(--leather-dark) 0%, var(--leather) 30%, var(--leather-dark) 50%, var(--leather) 70%, var(--leather-dark) 100%);
+    flex-shrink: 0;
+    box-shadow: inset -2px 0 8px rgba(0,0,0,0.4), inset 2px 0 8px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .book-spine::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: var(--gold-dark);
+    opacity: 0.4;
+  }
+
+  /* ═══ PAGE STYLES ═══ */
+  .page {
+    flex: 1;
+    background: var(--parchment);
+    padding: 48px 40px;
+    position: relative;
+    overflow-y: auto;
+    max-height: 85vh;
+  }
+  .page::-webkit-scrollbar { width: 8px; }
+  .page::-webkit-scrollbar-track { background: var(--parchment-dark); }
+  .page::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+  .page::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  /* Parchment noise texture */
+  .page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page > * { position: relative; z-index: 1; }
+
+  .page-left {
+    border-right: 1px solid var(--parchment-dark);
+    box-shadow: inset -15px 0 20px -10px rgba(0,0,0,0.08);
+  }
+  .page-right {
+    box-shadow: inset 15px 0 20px -10px rgba(0,0,0,0.08);
+  }
+
+  /* ═══ PAGE BORDER ═══ */
+  .page-border {
+    position: absolute;
+    inset: 16px;
+    border: 1px solid var(--gold-dark);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .page-border::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid var(--gold-dark);
+    opacity: 0.5;
+  }
+
+  /* ═══ CORNER ORNAMENTS ═══ */
+  .corner-ornament {
+    position: absolute;
+    font-size: 20px;
+    color: var(--gold-dark);
+    opacity: 0.4;
+    z-index: 3;
+    font-family: serif;
+    line-height: 1;
+  }
+  .corner-tl { top: 20px; left: 20px; }
+  .corner-tr { top: 20px; right: 20px; transform: scaleX(-1); }
+  .corner-bl { bottom: 20px; left: 20px; transform: scaleY(-1); }
+  .corner-br { bottom: 20px; right: 20px; transform: scale(-1); }
+
+  /* ═══ DECORATIVE ELEMENTS ═══ */
+  .flourish {
+    text-align: center;
+    color: var(--gold-dark);
+    opacity: 0.5;
+    font-size: 18px;
+    letter-spacing: 8px;
+    margin: 16px 0;
+    user-select: none;
+  }
+
+  .ruled-line {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold-dark) 20%, var(--gold-dark) 80%, transparent 100%);
+    opacity: 0.3;
+    margin: 20px 0;
+  }
+
+  .section-header {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  /* ═══ DROP CAP ═══ */
+  .drop-cap::first-letter {
+    font-family: 'Cinzel Decorative', cursive;
+    float: left;
+    font-size: 3.2em;
+    line-height: 0.8;
+    margin-right: 8px;
+    margin-top: 4px;
+    color: var(--accent);
+  }
+
+  /* ═══ VIEW MANAGEMENT ═══ */
+  .view { display: none; }
+  .view.active { display: flex; }
+
+  /* ═══ RECIPE INDEX ENTRIES ═══ */
+  .index-entry {
+    padding: 14px 0;
+    border-bottom: 1px dotted var(--gold-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .index-entry:hover {
+    padding-left: 10px;
+    background: rgba(201,168,76,0.08);
+  }
+  .index-entry:last-child { border-bottom: none; }
+
+  .index-num {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 14px;
+    width: 32px;
+    display: inline-block;
+  }
+
+  .index-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+  }
+
+  .index-detail {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    color: var(--ink-faded);
+    font-size: 14px;
+    margin-left: 32px;
+    margin-top: 2px;
+  }
+
+  .index-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--ink-faded);
+    margin: 0 12px;
+    opacity: 0.4;
+    align-self: flex-end;
+    margin-bottom: 4px;
+  }
+
+  .index-page {
+    font-family: 'Cinzel', serif;
+    color: var(--ink-faded);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ═══ INGREDIENT LIST ═══ */
+  .ing-item {
+    padding: 8px 0;
+    border-bottom: 1px dotted rgba(201,168,76,0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ing-item:last-child { border-bottom: none; }
+  .ing-name { font-size: 16px; color: var(--ink); }
+  .ing-qty {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  /* ═══ METHOD STEPS ═══ */
+  .method-step {
+    margin-bottom: 24px;
+    position: relative;
+    padding-left: 48px;
+  }
+  .step-num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 32px;
+    color: var(--gold-dark);
+    opacity: 0.5;
+    line-height: 1;
+  }
+  .step-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-light);
+  }
+  .step-text strong {
+    display: inline;
+    background: var(--accent);
+    color: var(--parchment-light);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* ═══ BUTTONS ═══ */
+  .btn-tome {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border: 2px solid var(--gold-dark);
+    background: transparent;
+    color: var(--leather);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-tome:hover {
+    background: var(--gold-dark);
+    color: var(--parchment-light);
+  }
+
+  .btn-accent {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border: 2px solid var(--accent);
+    background: var(--accent);
+    color: var(--parchment-light);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-accent:hover { background: var(--accent-light); border-color: var(--accent-light); }
+
+  .btn-subtle {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid var(--gold-dark);
+    background: transparent;
+    color: var(--ink-faded);
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.7;
+  }
+  .btn-subtle:hover { opacity: 1; background: rgba(201,168,76,0.1); }
+
+  /* ═══ NAV TABS ═══ */
+  .nav-tab {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: var(--ink-faded);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-tab:hover { color: var(--accent); }
+  .nav-tab.active { color: var(--accent); }
+  .nav-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    width: 60%;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  /* ═══ FORM INPUTS ═══ */
+  .tome-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--parchment-light);
+    border: 1px solid var(--gold-dark);
+    border-radius: 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .tome-input:focus { border-color: var(--accent); }
+  .tome-input::placeholder { color: var(--ink-faded); font-style: italic; }
+
+  .tome-select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--parchment-light);
+    border: 1px solid var(--gold-dark);
+    border-radius: 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .tome-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--parchment-light);
+    border: 1px solid var(--gold-dark);
+    border-radius: 0;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .tome-textarea:focus { border-color: var(--accent); }
+  .tome-textarea::placeholder { color: var(--ink-faded); font-style: italic; }
+
+  .field-label {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* ═══ MODALS ═══ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(42,24,16,0.7);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-scroll {
+    background: var(--parchment);
+    max-width: 650px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 48px 40px;
+    position: relative;
+    border: 3px double var(--gold-dark);
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+  .modal-scroll::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+  .modal-scroll > * { position: relative; z-index: 1; }
+  .modal-scroll::-webkit-scrollbar { width: 8px; }
+  .modal-scroll::-webkit-scrollbar-track { background: var(--parchment-dark); }
+  .modal-scroll::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+  /* ═══ PLANNER ENTRIES ═══ */
+  .planner-entry {
+    padding: 12px 16px;
+    border: 1px solid var(--gold-dark);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0.6;
+  }
+  .planner-entry:hover { background: rgba(201,168,76,0.1); opacity: 0.8; }
+  .planner-entry.selected {
+    border-color: var(--accent);
+    background: rgba(139,26,26,0.05);
+    opacity: 1;
+  }
+  .planner-check {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--parchment-light);
+  }
+  .planner-entry.selected .planner-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ═══ SHOPPING ITEM ═══ */
+  .shop-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dotted rgba(201,168,76,0.3);
+  }
+  .shop-item:last-child { border-bottom: none; }
+  .shop-check {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--forest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .shop-check.checked { background: var(--forest); border-color: var(--forest); }
+  .shop-unchecked .shop-name { text-decoration: line-through; opacity: 0.4; }
+
+  /* ═══ SERVINGS CONTROL ═══ */
+  .srv-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--gold-dark);
+    background: transparent;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .srv-btn:hover { background: var(--gold-dark); color: var(--parchment-light); }
+
+  input[type="range"] { accent-color: var(--accent); }
+
+  .loading-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(244,228,193,0.3); border-top-color: var(--parchment-light);
+    border-radius: 50%; animation: spin 0.6s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-ok { color: var(--forest); }
+  .status-err { color: var(--accent); }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 768px) {
+    body { padding: 8px; }
+    .book-spread { flex-direction: column; }
+    .book-spine { width: 100%; height: 16px; }
+    .book-spine::after { top: 50%; left: 10%; right: 10%; bottom: auto; width: auto; height: 2px; transform: translateY(-50%); }
+    .page { padding: 32px 24px; max-height: none; }
+    .view.active { flex-direction: column; }
+    .page-left { border-right: none; border-bottom: 1px solid var(--parchment-dark); box-shadow: none; }
+    .page-right { box-shadow: none; }
+    .corner-ornament { display: none; }
+    .page-border { inset: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ THE BOOK ══════════════ -->
+<div class="book">
+
+  <!-- ═══ LIST VIEW — The Index ═══ -->
+  <div id="view-list" class="view active">
+    <div class="book-spread">
+
+      <!-- Left page: Title & Nav -->
+      <div class="page page-left">
+        <div class="page-border"></div>
+        <span class="corner-ornament corner-tl">&#10045;</span>
+        <span class="corner-ornament corner-tr">&#10045;</span>
+        <span class="corner-ornament corner-bl">&#10045;</span>
+        <span class="corner-ornament corner-br">&#10045;</span>
+
+        <div style="text-align:center; margin-bottom: 32px;">
+          <div class="flourish">&#10040; &#10040; &#10040;</div>
+          <h1 style="font-family:'Cinzel Decorative',cursive; font-size:28px; color:var(--accent); margin-bottom:8px; line-height:1.2;">The Adventurer's<br/>Cookbook</h1>
+          <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:15px;">A Collection of Recipes for the<br/>Discerning Dungeon Gourmet</p>
+          <div class="flourish">&#10040; &#10040; &#10040;</div>
+        </div>
+
+        <hr class="ruled-line"/>
+
+        <p id="header-subtitle" style="font-family:'IM Fell English',serif; font-style:italic; text-align:center; color:var(--ink-faded); font-size:15px; margin-bottom: 24px;"></p>
+
+        <!-- Navigation -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:24px;">
+          <button onclick="openAddModal()" class="btn-accent" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:18px;">edit_note</span> Inscribe New Recipe
+          </button>
+          <div style="display:flex; gap:8px;">
+            <button onclick="openImportModal()" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
+              <span class="material-symbols-outlined" style="font-size:16px;">link</span> Import Scroll
+            </button>
+            <button onclick="openShoppingList()" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
+              <span class="material-symbols-outlined" style="font-size:16px;">shopping_cart</span> Provisions
+            </button>
+          </div>
+        </div>
+
+        <hr class="ruled-line"/>
+
+        <!-- Search -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:8px; border:1px solid var(--gold-dark); padding:8px 12px;">
+            <span class="material-symbols-outlined" style="color:var(--ink-faded); font-size:18px;">search</span>
+            <input id="searchInput" class="tome-input" style="border:none; padding:0; background:transparent;" placeholder="Search the tome..." oninput="filterRecipes()" type="text"/>
+          </div>
+        </div>
+
+        <!-- Export / Import -->
+        <div style="display:flex; gap:8px; justify-content:center;">
+          <button onclick="exportData()" class="btn-subtle" style="display:flex; align-items:center; gap:4px;">
+            <span class="material-symbols-outlined" style="font-size:14px;">download</span> Export
+          </button>
+          <button onclick="document.getElementById('importFile').click()" class="btn-subtle" style="display:flex; align-items:center; gap:4px;">
+            <span class="material-symbols-outlined" style="font-size:14px;">upload</span> Import
+          </button>
+          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)" style="display:none;"/>
+        </div>
+
+        <div style="margin-top:auto; padding-top:32px; text-align:center;">
+          <p id="sidebar-count" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:13px;"></p>
+        </div>
+      </div>
+
+      <!-- Spine -->
+      <div class="book-spine"></div>
+
+      <!-- Right page: Recipe Index -->
+      <div class="page page-right">
+        <div class="page-border"></div>
+        <span class="corner-ornament corner-tl">&#10045;</span>
+        <span class="corner-ornament corner-tr">&#10045;</span>
+        <span class="corner-ornament corner-bl">&#10045;</span>
+        <span class="corner-ornament corner-br">&#10045;</span>
+
+        <div style="text-align:center; margin-bottom:24px;">
+          <p class="section-header">Table of Recipes</p>
+          <div class="flourish">&#8212; &#10043; &#8212;</div>
+        </div>
+
+        <div id="recipeGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DETAIL VIEW — The Recipe Page ═══ -->
+  <div id="view-detail" class="view">
+    <div class="book-spread">
+
+      <!-- Left page: Ingredients -->
+      <div class="page page-left">
+        <div class="page-border"></div>
+        <span class="corner-ornament corner-tl">&#10045;</span>
+        <span class="corner-ornament corner-tr">&#10045;</span>
+        <span class="corner-ornament corner-bl">&#10045;</span>
+        <span class="corner-ornament corner-br">&#10045;</span>
+
+        <button onclick="showView('list')" style="display:flex; align-items:center; gap:6px; font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-faded); background:none; border:none; cursor:pointer; margin-bottom:24px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-faded)'">
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Return to Index
+        </button>
+
+        <div style="text-align:center; margin-bottom:20px;">
+          <div class="flourish">&#10040; &#10040; &#10040;</div>
+          <h1 id="detail-name" style="font-family:'Cinzel Decorative',cursive; font-size:24px; color:var(--accent); line-height:1.3; margin-bottom:8px;"></h1>
+          <div id="detail-tags" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px;"></div>
+          <div class="flourish">&#10040; &#10040; &#10040;</div>
+        </div>
+
+        <hr class="ruled-line"/>
+
+        <!-- Servings -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+            <span class="section-header" style="margin-bottom:0;">Serves</span>
+            <span id="detail-servings-val" style="font-family:'Cinzel Decorative',cursive; font-size:28px; color:var(--accent);"></span>
+          </div>
+          <input id="detail-servings-slider" type="range" min="1" max="8" style="width:100%;" oninput="onDetailServingsChange(this.value)"/>
+        </div>
+
+        <hr class="ruled-line"/>
+
+        <p class="section-header">Required Ingredients</p>
+        <div id="detail-ingredients"></div>
+
+        <!-- Source link -->
+        <div id="detail-source-card" style="display:none; margin-top:24px; padding:16px; border:1px solid var(--gold-dark); text-align:center;">
+          <p style="font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-faded); margin-bottom:8px;">Original Scroll</p>
+          <a id="detail-source-link" href="#" target="_blank" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--accent); font-size:14px; word-break:break-all;"></a>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; gap:8px; margin-top:24px;">
+          <button onclick="openEditModal(currentRecipeId)" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">edit</span> Amend
+          </button>
+          <button onclick="deleteRecipeAndBack(currentRecipeId)" class="btn-subtle" style="display:flex; align-items:center; justify-content:center; gap:6px; border-color:var(--accent); color:var(--accent);">
+            <span class="material-symbols-outlined" style="font-size:16px;">delete</span> Burn
+          </button>
+        </div>
+      </div>
+
+      <!-- Spine -->
+      <div class="book-spine"></div>
+
+      <!-- Right page: Method -->
+      <div class="page page-right">
+        <div class="page-border"></div>
+        <span class="corner-ornament corner-tl">&#10045;</span>
+        <span class="corner-ornament corner-tr">&#10045;</span>
+        <span class="corner-ornament corner-bl">&#10045;</span>
+        <span class="corner-ornament corner-br">&#10045;</span>
+
+        <div style="text-align:center; margin-bottom:28px;">
+          <p class="section-header">The Method of Preparation</p>
+          <div class="flourish">&#8212; &#10043; &#8212;</div>
+        </div>
+
+        <div id="detail-method"></div>
+
+        <hr class="ruled-line" style="margin-top:32px;"/>
+        <div style="text-align:center;">
+          <button onclick="openShoppingList()" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px; background:none; border:none; cursor:pointer;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-faded)'">
+            Add to Provisions List &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL: ADD / EDIT RECIPE ═════════════════════════════ -->
+<div id="modal-recipe" class="modal-overlay">
+  <div class="modal-scroll">
+    <div style="text-align:center; margin-bottom:24px;">
+      <h2 id="modal-recipe-title" style="font-family:'Cinzel Decorative',cursive; font-size:22px; color:var(--accent);">Inscribe Recipe</h2>
+      <div class="flourish">&#8212; &#10043; &#8212;</div>
+    </div>
+    <input type="hidden" id="editId"/>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <label class="field-label">Recipe Name *</label>
+        <input id="recipeName" type="text" placeholder="e.g. Dragon-Fire Roasted Chicken" class="tome-input"/>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+        <div>
+          <label class="field-label">Category</label>
+          <select id="recipeCategory" class="tome-select">
+            <option value="">Select...</option>
+            <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+            <option>Dessert</option><option>Snack</option><option>Side</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Prep Time</label>
+          <input id="recipePrepTime" type="text" placeholder="15 min" class="tome-input"/>
+        </div>
+        <div>
+          <label class="field-label">Cook Time</label>
+          <input id="recipeCookTime" type="text" placeholder="30 min" class="tome-input"/>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="field-label">Base Servings</label>
+          <input id="recipeBaseServings" type="number" value="2" min="1" max="20" class="tome-input"/>
+        </div>
+        <div>
+          <label class="field-label">Source Scroll URL</label>
+          <input id="recipeUrl" type="text" placeholder="https://..." class="tome-input"/>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Ingredients *</label>
+        <textarea id="recipeIngredients" rows="6" placeholder="One per line:&#10;400g spaghetti&#10;500g beef mince&#10;2 cloves garlic" class="tome-textarea"></textarea>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:13px; margin-top:4px;">One ingredient per line. Numbers at the start enable scaling.</p>
+      </div>
+      <div>
+        <label class="field-label">Method *</label>
+        <textarea id="recipeMethod" rows="6" placeholder="One step per line:&#10;Boil salted water and cook pasta al dente&#10;Fry mince until browned" class="tome-textarea"></textarea>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:13px; margin-top:4px;">One step per line.</p>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:24px;">
+      <button onclick="closeRecipeModal()" class="btn-tome">Cancel</button>
+      <button onclick="saveRecipe()" class="btn-accent">Save to Tome</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: IMPORT FROM URL ════════════════════════════════ -->
+<div id="modal-import" class="modal-overlay">
+  <div class="modal-scroll">
+    <div style="text-align:center; margin-bottom:24px;">
+      <h2 style="font-family:'Cinzel Decorative',cursive; font-size:22px; color:var(--accent);">Import a Scroll</h2>
+      <div class="flourish">&#8212; &#10043; &#8212;</div>
+      <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:15px; margin-top:8px;">Paste a recipe link and we shall decipher it for you.</p>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <input id="urlInput" type="text" placeholder="https://www.recipe-site.com/..." class="tome-input" style="flex:1;" onkeydown="if(event.key==='Enter')importFromUrl()"/>
+      <button id="urlBtn" onclick="importFromUrl()" class="btn-accent" style="flex-shrink:0;">Import</button>
+    </div>
+    <div id="urlStatus" style="font-family:'IM Fell English',serif; font-size:14px; margin-bottom:12px;"></div>
+    <!-- Paste fallback -->
+    <div id="pasteSourceFallback" style="display:none; border-top:1px solid var(--gold-dark); padding-top:16px; margin-top:8px;">
+      <p style="font-family:'IM Fell English',serif; color:var(--ink-light); font-size:14px; margin-bottom:12px;">
+        <strong style="color:var(--accent);">Fallback:</strong> Open the recipe page, right-click &rarr; <em>View Page Source</em>, select all (Cmd+A) and copy, then paste below.
+      </p>
+      <textarea id="pasteSourceInput" rows="5" placeholder="Paste the page source HTML here..." class="tome-textarea" style="font-size:13px;"></textarea>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button onclick="importFromPastedSource()" class="btn-accent" style="font-size:10px;">Extract Recipe</button>
+        <button onclick="document.getElementById('pasteSourceFallback').style.display='none'" class="btn-tome" style="font-size:10px;">Cancel</button>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+      <button onclick="closeImportModal()" class="btn-tome">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: WEEKLY PLANNER ══════════════════════════════════ -->
+<div id="modal-shopping" class="modal-overlay">
+  <div class="modal-scroll" style="max-width:700px; display:flex; flex-direction:column; max-height:90vh;">
+
+    <!-- Header -->
+    <div style="text-align:center; margin-bottom:8px; flex-shrink:0;">
+      <div style="display:flex; justify-content:flex-end;">
+        <button onclick="closeShoppingModal()" style="background:none; border:none; cursor:pointer; color:var(--ink-faded);">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <h2 style="font-family:'Cinzel Decorative',cursive; font-size:22px; color:var(--accent);">Weekly Provisions</h2>
+      <div class="flourish">&#8212; &#10043; &#8212;</div>
+    </div>
+
+    <!-- Step indicator -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-shrink:0;">
+      <div id="step-indicator-1" style="display:flex; align-items:center; gap:6px;">
+        <span style="width:24px; height:24px; background:var(--accent); color:var(--parchment-light); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:12px;">1</span>
+        <span style="font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--accent);">Choose Recipes</span>
+      </div>
+      <div style="flex:1; height:1px; background:var(--gold-dark); opacity:0.3;"></div>
+      <div id="step-indicator-2" style="display:flex; align-items:center; gap:6px; opacity:0.4;">
+        <span id="step2-circle" style="width:24px; height:24px; background:var(--ink-faded); color:var(--parchment-light); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:12px;">2</span>
+        <span id="step2-label" style="font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-faded);">Provisions List</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Pick Recipes -->
+    <div id="planner-step1" style="flex:1; overflow-y:auto; margin-bottom:16px;">
+      <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px; margin-bottom:16px;">Select the recipes you wish to prepare this week and set your servings.</p>
+      <div id="planner-recipe-list"></div>
+      <div id="planner-empty" style="display:none; text-align:center; padding:40px 0; color:var(--ink-faded);">
+        <span class="material-symbols-outlined" style="font-size:48px; color:var(--gold-dark); opacity:0.4;">menu_book</span>
+        <p style="font-family:'Cinzel',serif; font-size:16px; margin-top:12px;">The tome is empty</p>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; font-size:14px; margin-top:4px;">Inscribe some recipes first, then return to plan your week.</p>
+      </div>
+    </div>
+
+    <!-- Step 2: Shopping List -->
+    <div id="planner-step2" style="display:none; flex:1; overflow-y:auto; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px;">Tick the provisions you need to procure.</p>
+        <div style="display:flex; gap:8px;">
+          <button onclick="checkAllShopping(true)" style="font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--forest); background:none; border:none; cursor:pointer;">All</button>
+          <span style="color:var(--gold-dark);">&middot;</span>
+          <button onclick="checkAllShopping(false)" style="font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-faded); background:none; border:none; cursor:pointer;">None</button>
+        </div>
+      </div>
+      <div id="shopping-list-content"></div>
+    </div>
+
+    <!-- Footer -->
+    <div style="flex-shrink:0; border-top:1px solid var(--gold-dark); padding-top:16px;">
+      <!-- Step 1 footer -->
+      <div id="planner-footer1" style="display:flex; align-items:center; justify-content:space-between;">
+        <span id="planner-selected-count" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px;">0 recipes selected</span>
+        <button onclick="goToShoppingList()" id="btn-next-step" class="btn-accent" style="display:flex; align-items:center; gap:6px;">
+          View Provisions <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+        </button>
+      </div>
+      <!-- Step 2 footer -->
+      <div id="planner-footer2" style="display:none; display:none; align-items:center; justify-content:space-between; gap:12px;">
+        <button onclick="goBackToPlanner()" class="btn-tome" style="display:flex; align-items:center; gap:6px; font-size:10px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Back
+        </button>
+        <button onclick="sendToNotes()" class="btn-accent" style="display:flex; align-items:center; gap:6px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">note_alt</span> Send to Notes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ JAVASCRIPT ════════════════════════════════════════════ -->
+<script>
+// ─── State ───────────────────────────────────────────────────
+var recipes = JSON.parse(localStorage.getItem('recipes') || '[]');
+var servingOverrides = {};
+var currentRecipeId = null;
+var currentView = 'list';
+
+function save() { localStorage.setItem('recipes', JSON.stringify(recipes)); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+// ─── View Management ─────────────────────────────────────────
+function showView(name) {
+  currentView = name;
+  document.getElementById('view-list').classList.toggle('active', name === 'list');
+  document.getElementById('view-detail').classList.toggle('active', name === 'detail');
+  if (name === 'list') { renderRecipes(); updateSidebarCount(); }
+}
+
+function updateSidebarCount() {
+  var el = document.getElementById('sidebar-count');
+  if (el) el.textContent = recipes.length + ' recipe' + (recipes.length !== 1 ? 's' : '') + ' inscribed in this tome';
+}
+
+// ─── List View Rendering ─────────────────────────────────────
+function filterRecipes() {
+  var q = document.getElementById('searchInput').value || '';
+  renderRecipes(q.toLowerCase());
+}
+
+function renderRecipes(query) {
+  query = query || '';
+  var grid = document.getElementById('recipeGrid');
+  var subtitle = document.getElementById('header-subtitle');
+  var filtered = recipes.filter(function(r) {
+    return r.name.toLowerCase().includes(query) ||
+      (r.category || '').toLowerCase().includes(query) ||
+      r.ingredients.some(function(i) { return i.toLowerCase().includes(query); });
+  });
+
+  subtitle.textContent = recipes.length === 0
+    ? 'The pages await your first inscription...'
+    : recipes.length + ' recipe' + (recipes.length !== 1 ? 's' : '') + ' recorded within these pages.';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="text-align:center; padding:48px 0; color:var(--ink-faded);">' +
+      '<span class="material-symbols-outlined" style="font-size:48px; color:var(--gold-dark); opacity:0.4;">menu_book</span>' +
+      '<h3 style="font-family:\'Cinzel\',serif; font-size:18px; margin-top:12px;">' + (recipes.length === 0 ? 'The tome is empty' : 'No scrolls match thy query') + '</h3>' +
+      '<p style="font-family:\'IM Fell English\',serif; font-style:italic; font-size:14px; margin-top:4px;">' + (recipes.length === 0 ? 'Inscribe a new recipe or import one from a scroll.' : 'Try a different search term.') + '</p>' +
+      '</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(function(r, idx) {
+    var ingCount = r.ingredients.length;
+    var servings = servingOverrides[r.id] || r.baseServings || 2;
+    var details = [];
+    if (r.category) details.push(r.category);
+    if (r.prepTime) details.push('Prep ' + r.prepTime);
+    if (r.cookTime) details.push('Cook ' + r.cookTime);
+    details.push('Serves ' + servings);
+    details.push(ingCount + ' ingredients');
+
+    return '<div class="index-entry" onclick="openRecipeDetail(\'' + r.id + '\')">' +
+      '<div style="display:flex; align-items:baseline;">' +
+      '<span class="index-num">' + String(idx + 1).padStart(2, '0') + '.</span>' +
+      '<span class="index-name">' + esc(r.name) + '</span>' +
+      '<span class="index-dots"></span>' +
+      '<span class="index-page">' + ingCount + '</span>' +
+      '</div>' +
+      '<div class="index-detail">' + esc(details.join(' · ')) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+// ─── Detail View ──────────────────────────────────────────────
+function openRecipeDetail(id) {
+  var r = recipes.find(function(x) { return x.id === id; });
+  if (!r) return;
+  currentRecipeId = id;
+  if (!servingOverrides[id]) servingOverrides[id] = r.baseServings || 2;
+
+  document.getElementById('detail-name').textContent = r.name;
+
+  // Tags
+  var tags = '';
+  if (r.category) tags += '<span style="font-family:\'Cinzel\',serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; border:1px solid var(--gold-dark); padding:4px 10px; color:var(--ink-faded);">' + esc(r.category) + '</span>';
+  if (r.prepTime) tags += '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:14px;">Prep ' + esc(r.prepTime) + '</span>';
+  if (r.cookTime) tags += '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:14px;">Cook ' + esc(r.cookTime) + '</span>';
+  document.getElementById('detail-tags').innerHTML = tags;
+
+  // Servings
+  var servings = servingOverrides[id];
+  document.getElementById('detail-servings-slider').value = servings;
+  document.getElementById('detail-servings-val').textContent = servings;
+
+  // Source
+  var srcCard = document.getElementById('detail-source-card');
+  var srcLink = document.getElementById('detail-source-link');
+  if (r.url) {
+    srcCard.style.display = 'block';
+    srcLink.href = r.url;
+    srcLink.textContent = r.url;
+  } else {
+    srcCard.style.display = 'none';
+  }
+
+  renderDetailIngredients(r, servings);
+  renderDetailMethod(r, servings);
+  showView('detail');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderDetailIngredients(r, servings) {
+  var parsedIngredients = r.ingredients.map(parseIngredient).filter(Boolean);
+  var html = parsedIngredients.map(function(p) {
+    var scaled = scaleIngredient(p, r.baseServings || 2, servings);
+    var sp = parseIngredient(scaled);
+    var qtyDisplay = (sp && sp.qty !== null) ? formatQty(sp.qty) + (sp.unit || '') : '';
+    var nameDisplay = (sp && sp.qty !== null) ? esc(sp.name) : esc(p.raw);
+    return '<div class="ing-item">' +
+      '<span class="ing-name">' + nameDisplay + '</span>' +
+      (qtyDisplay ? '<span class="ing-qty">' + qtyDisplay + '</span>' : '') +
+      '</div>';
+  }).join('');
+  document.getElementById('detail-ingredients').innerHTML = html || '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded);">No ingredients listed.</p>';
+}
+
+function renderDetailMethod(r, servings) {
+  var parsedIngredients = r.ingredients.map(parseIngredient).filter(Boolean);
+  var html = r.method.map(function(step, i) {
+    var num = String(i + 1);
+    var annotated = annotateMethodStep(esc(step), parsedIngredients, r.baseServings || 2, servings);
+    return '<div class="method-step">' +
+      '<span class="step-num">' + num + '</span>' +
+      '<p class="step-text">' + annotated + '</p>' +
+      '</div>';
+  }).join('');
+  document.getElementById('detail-method').innerHTML = html || '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded);">No method listed.</p>';
+}
+
+function onDetailServingsChange(val) {
+  var r = recipes.find(function(x) { return x.id === currentRecipeId; });
+  if (!r) return;
+  servingOverrides[currentRecipeId] = parseInt(val);
+  document.getElementById('detail-servings-val').textContent = val;
+  renderDetailIngredients(r, parseInt(val));
+  renderDetailMethod(r, parseInt(val));
+}
+
+function deleteRecipeAndBack(id) {
+  if (!confirm('Burn this recipe from the tome? This cannot be undone.')) return;
+  recipes = recipes.filter(function(x) { return x.id !== id; });
+  save();
+  showView('list');
+}
+
+// ─── US to Metric Conversion ──────────────────────────────────
+var METRIC_CONVERSIONS = {
+  'cup': { ml: 240 }, 'cups': { ml: 240 },
+  'tablespoon': { ml: 15 }, 'tablespoons': { ml: 15 }, 'tbsp': { ml: 15 },
+  'teaspoon': { ml: 5 }, 'teaspoons': { ml: 5 }, 'tsp': { ml: 5 },
+  'fl oz': { ml: 30 }, 'fluid ounce': { ml: 30 }, 'fluid ounces': { ml: 30 },
+  'pint': { ml: 473 }, 'pints': { ml: 473 },
+  'quart': { ml: 946 }, 'quarts': { ml: 946 },
+  'ounce': { g: 28 }, 'ounces': { g: 28 }, 'oz': { g: 28 },
+  'pound': { g: 454 }, 'pounds': { g: 454 }, 'lb': { g: 454 }, 'lbs': { g: 454 },
+};
+var DENSITY = {
+  'flour': 125, 'all-purpose flour': 125, 'plain flour': 125, 'bread flour': 130,
+  'sugar': 200, 'granulated sugar': 200, 'caster sugar': 200,
+  'brown sugar': 220, 'powdered sugar': 120, 'icing sugar': 120,
+  'butter': 227, 'unsalted butter': 227,
+  'rice': 185, 'oats': 90, 'cocoa powder': 85,
+  'honey': 340, 'maple syrup': 315, 'milk': 245, 'cream': 240,
+  'heavy cream': 240, 'sour cream': 230, 'yogurt': 245,
+  'parmesan': 100, 'grated parmesan': 100,
+  'olive oil': 216, 'extra virgin olive oil': 216, 'vegetable oil': 218,
+  'tomato paste': 260, 'peanut butter': 258,
+};
+
+function convertToMetric(qty, unit, ingredientName) {
+  if (!qty || !unit) return { qty: qty, unit: unit };
+  var unitLower = unit.toLowerCase().trim();
+  var conv = METRIC_CONVERSIONS[unitLower];
+  if (!conv) return { qty: qty, unit: unit };
+  if ((unitLower === 'cup' || unitLower === 'cups') && ingredientName) {
+    var nameLower = ingredientName.toLowerCase().trim().replace(/,.*$/, '').trim();
+    for (var key in DENSITY) {
+      if (nameLower.includes(key) || key.includes(nameLower)) {
+        return { qty: Math.round(qty * DENSITY[key]), unit: 'g' };
+      }
+    }
+    return { qty: Math.round(qty * conv.ml), unit: 'ml' };
+  }
+  if (conv.ml) {
+    var ml = qty * conv.ml;
+    if (ml < 15) return { qty: Math.round(ml), unit: 'ml' };
+    if (ml >= 1000) return { qty: +(ml / 1000).toFixed(1), unit: 'L' };
+    return { qty: Math.round(ml), unit: 'ml' };
+  }
+  if (conv.g) {
+    var g = qty * conv.g;
+    if (g >= 1000) return { qty: +(g / 1000).toFixed(1), unit: 'kg' };
+    return { qty: Math.round(g), unit: 'g' };
+  }
+  return { qty: qty, unit: unit };
+}
+
+function convertIngredientLine(line) {
+  var parsed = parseIngredient(line);
+  if (!parsed || parsed.qty === null) return line;
+  var result = convertToMetric(parsed.qty, parsed.unit, parsed.name);
+  if (result.unit === parsed.unit) return line;
+  return formatQty(result.qty) + result.unit + ' ' + parsed.name;
+}
+
+// ─── Ingredient Parsing ───────────────────────────────────────
+function parseIngredient(line) {
+  line = (line || '').trim();
+  if (!line) return null;
+  var match = line.match(/^(\d+\.?\d*(?:\s*\/\s*\d+)?(?:\s*[½¼¾⅓⅔⅛])?|[½¼¾⅓⅔⅛])\s*([a-zA-Z]*)\s+(.*)/);
+  if (match) {
+    return { qty: parseFraction(match[1].trim()), unit: match[2] || '', name: match[3], raw: line };
+  }
+  var simple = line.match(/^(\d+\.?\d*)\s+(.*)/);
+  if (simple) {
+    return { qty: parseFloat(simple[1]), unit: '', name: simple[2], raw: line };
+  }
+  return { qty: null, unit: '', name: line, raw: line };
+}
+
+function parseFraction(s) {
+  var uf = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.667, '⅛': 0.125 };
+  for (var ch in uf) {
+    if (s.includes(ch)) { var rest = s.replace(ch, '').trim(); return rest ? parseFloat(rest) + uf[ch] : uf[ch]; }
+  }
+  if (s.includes('/')) { var p = s.split('/'); return parseFloat(p[0]) / parseFloat(p[1]); }
+  return parseFloat(s);
+}
+
+function formatQty(qty) {
+  if (qty === null || isNaN(qty)) return '';
+  if (qty === Math.floor(qty)) return qty.toString();
+  var diff = qty - Math.floor(qty), base = Math.floor(qty);
+  var fracs = [[0.25,'¼'],[0.333,'⅓'],[0.5,'½'],[0.667,'⅔'],[0.75,'¾']];
+  for (var i = 0; i < fracs.length; i++) {
+    if (Math.abs(diff - fracs[i][0]) < 0.05) return base ? base + fracs[i][1] : fracs[i][1];
+  }
+  return qty.toFixed(1).replace(/\.0$/, '');
+}
+
+function scaleIngredient(parsed, baseServings, targetServings) {
+  if (!parsed || parsed.qty === null) return parsed ? parsed.raw : '';
+  var scaled = (parsed.qty / baseServings) * targetServings;
+  return formatQty(scaled) + parsed.unit + ' ' + parsed.name;
+}
+
+// ─── Method Annotation ────────────────────────────────────────
+function annotateMethodStep(stepText, parsedIngredients, baseServings, targetServings) {
+  var annotated = stepText;
+  var sorted = parsedIngredients.filter(function(p) { return p && p.name; })
+    .slice().sort(function(a, b) { return b.name.length - a.name.length; });
+  for (var i = 0; i < sorted.length; i++) {
+    var p = sorted[i];
+    var nameParts = p.name.toLowerCase().replace(/,.*$/, '').trim();
+    var keywords = nameParts.split(/\s+/).filter(function(w) { return w.length > 3; });
+    var candidates = [nameParts].concat(keywords);
+    for (var j = 0; j < candidates.length; j++) {
+      var term = candidates[j];
+      var escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var regex = new RegExp('\\b' + escaped + '\\b', 'i');
+      if (regex.test(annotated) && p.qty !== null) {
+        var scaled = (p.qty / baseServings) * targetServings;
+        var measurement = formatQty(scaled) + p.unit;
+        var checkEscaped = measurement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (!new RegExp('\\(' + checkEscaped + '\\)', 'i').test(annotated)) {
+          annotated = annotated.replace(regex,
+            '<strong>(' + measurement + ')</strong> ' + term);
+        }
+        break;
+      }
+    }
+  }
+  return annotated;
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ─── CRUD ─────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('modal-recipe-title').textContent = 'Inscribe Recipe';
+  document.getElementById('editId').value = '';
+  document.getElementById('recipeName').value = '';
+  document.getElementById('recipeCategory').value = '';
+  document.getElementById('recipePrepTime').value = '';
+  document.getElementById('recipeCookTime').value = '';
+  document.getElementById('recipeBaseServings').value = '2';
+  document.getElementById('recipeUrl').value = '';
+  document.getElementById('recipeIngredients').value = '';
+  document.getElementById('recipeMethod').value = '';
+  showModal('modal-recipe');
+}
+
+function openEditModal(id) {
+  var r = recipes.find(function(x) { return x.id === id; });
+  if (!r) return;
+  document.getElementById('modal-recipe-title').textContent = 'Amend Recipe';
+  document.getElementById('editId').value = id;
+  document.getElementById('recipeName').value = r.name;
+  document.getElementById('recipeCategory').value = r.category || '';
+  document.getElementById('recipePrepTime').value = r.prepTime || '';
+  document.getElementById('recipeCookTime').value = r.cookTime || '';
+  document.getElementById('recipeBaseServings').value = r.baseServings || 2;
+  document.getElementById('recipeUrl').value = r.url || '';
+  document.getElementById('recipeIngredients').value = r.ingredients.join('\n');
+  document.getElementById('recipeMethod').value = r.method.join('\n');
+  showModal('modal-recipe');
+}
+
+function closeRecipeModal() { hideModal('modal-recipe'); }
+
+function saveRecipe() {
+  var name = document.getElementById('recipeName').value.trim();
+  var ingredients = document.getElementById('recipeIngredients').value.trim().split('\n').filter(function(l) { return l.trim(); });
+  var method = document.getElementById('recipeMethod').value.trim().split('\n').filter(function(l) { return l.trim(); });
+  if (!name) return alert('Please enter a recipe name.');
+  if (!ingredients.length) return alert('Please add at least one ingredient.');
+  if (!method.length) return alert('Please add at least one method step.');
+
+  var data = {
+    name: name,
+    category: document.getElementById('recipeCategory').value,
+    prepTime: document.getElementById('recipePrepTime').value.trim(),
+    cookTime: document.getElementById('recipeCookTime').value.trim(),
+    baseServings: parseInt(document.getElementById('recipeBaseServings').value) || 2,
+    url: document.getElementById('recipeUrl').value.trim(),
+    ingredients: ingredients,
+    method: method,
+  };
+
+  var editId = document.getElementById('editId').value;
+  if (editId) {
+    var idx = recipes.findIndex(function(x) { return x.id === editId; });
+    if (idx !== -1) recipes[idx] = Object.assign({}, recipes[idx], data);
+  } else {
+    recipes.push(Object.assign({ id: genId() }, data));
+  }
+  save();
+  closeRecipeModal();
+  if (currentView === 'list') renderRecipes();
+  else if (editId && editId === currentRecipeId) openRecipeDetail(editId);
+  updateSidebarCount();
+}
+
+// ─── Import Modal ─────────────────────────────────────────────
+function openImportModal() {
+  document.getElementById('urlStatus').textContent = '';
+  document.getElementById('urlStatus').className = '';
+  document.getElementById('urlInput').value = '';
+  document.getElementById('pasteSourceInput').value = '';
+  document.getElementById('pasteSourceFallback').style.display = 'none';
+  showModal('modal-import');
+}
+function closeImportModal() { hideModal('modal-import'); }
+
+// ─── URL Import ───────────────────────────────────────────────
+async function importFromUrl() {
+  var url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  var status = document.getElementById('urlStatus');
+  var btn = document.getElementById('urlBtn');
+  btn.innerHTML = '<span class="loading-spinner"></span>Deciphering...';
+  btn.disabled = true;
+  status.textContent = '';
+  status.className = '';
+  document.getElementById('pasteSourceFallback').style.display = 'none';
+
+  try {
+    var proxies = [
+      function(u) { return 'https://api.allorigins.win/get?url=' + encodeURIComponent(u); },
+      function(u) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); },
+      function(u) { return 'https://corsproxy.io/?' + encodeURIComponent(u); },
+      function(u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+    ];
+    var html = null;
+    for (var i = 0; i < proxies.length; i++) {
+      try {
+        var resp = await fetch(proxies[i](url), { signal: AbortSignal.timeout(20000) });
+        if (resp.ok) {
+          var text = await resp.text();
+          try { var json = JSON.parse(text); if (json.contents) text = json.contents; } catch(e) {}
+          if (text && text.length > 500) { html = text; break; }
+        }
+      } catch(e) {}
+    }
+    if (!html) {
+      document.getElementById('pasteSourceFallback').style.display = 'block';
+      throw new Error('Could not fetch the scroll automatically. Use the paste fallback below.');
+    }
+    var recipe = extractRecipe(html);
+    if (!recipe) {
+      document.getElementById('pasteSourceFallback').style.display = 'block';
+      throw new Error('Could not decipher recipe data on that scroll. Try the paste fallback below.');
+    }
+    fillRecipeModal(recipe, url);
+    status.textContent = 'Recipe deciphered and converted to metric! Review and save to thy tome.';
+    status.className = 'status-ok';
+    document.getElementById('urlInput').value = '';
+    hideModal('modal-import');
+    showModal('modal-recipe');
+  } catch(e) {
+    status.textContent = e.message;
+    status.className = 'status-err';
+  } finally {
+    btn.innerHTML = 'Import';
+    btn.disabled = false;
+  }
+}
+
+function importFromPastedSource() {
+  var html = document.getElementById('pasteSourceInput').value.trim();
+  var url = document.getElementById('urlInput').value.trim();
+  if (!html) return alert('Please paste the page source first.');
+  var recipe = extractRecipe(html);
+  if (!recipe) return alert('Could not decipher recipe data in the pasted source. Try inscribing the recipe manually.');
+  fillRecipeModal(recipe, url);
+  document.getElementById('pasteSourceInput').value = '';
+  document.getElementById('pasteSourceFallback').style.display = 'none';
+  document.getElementById('urlInput').value = '';
+  hideModal('modal-import');
+  showModal('modal-recipe');
+}
+
+function fillRecipeModal(recipe, url) {
+  var metricIngredients = (recipe.ingredients || []).map(convertIngredientLine);
+  document.getElementById('modal-recipe-title').textContent = 'Imported Scroll — Review & Save';
+  document.getElementById('editId').value = '';
+  document.getElementById('recipeName').value = recipe.name || '';
+  document.getElementById('recipeCategory').value = recipe.category || 'Dinner';
+  document.getElementById('recipePrepTime').value = recipe.prepTime || '';
+  document.getElementById('recipeCookTime').value = recipe.cookTime || '';
+  document.getElementById('recipeBaseServings').value = recipe.baseServings || 2;
+  document.getElementById('recipeUrl').value = url || '';
+  document.getElementById('recipeIngredients').value = metricIngredients.join('\n');
+  document.getElementById('recipeMethod').value = (recipe.method || []).join('\n');
+}
+
+// ─── Recipe Extraction ────────────────────────────────────────
+function isRecipeType(obj) {
+  if (!obj || !obj['@type']) return false;
+  var types = Array.isArray(obj['@type']) ? obj['@type'] : [obj['@type']];
+  return types.some(function(t) { return typeof t === 'string' && t.toLowerCase() === 'recipe'; });
+}
+
+function extractRecipe(html) {
+  var doc = new DOMParser().parseFromString(html, 'text/html');
+  var scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (var i = 0; i < scripts.length; i++) {
+    try {
+      var raw = scripts[i].textContent || scripts[i].innerText || '';
+      if (!raw.trim()) continue;
+      var data = JSON.parse(raw);
+      var found = findRecipeInJsonLd(data);
+      if (found && found.recipeIngredient && found.recipeIngredient.length > 0) {
+        return parseJsonLdRecipe(found);
+      }
+    } catch(e) {}
+  }
+  var microdata = doc.querySelector('[itemtype*="schema.org/Recipe"]');
+  if (microdata) {
+    var mResult = parseMicrodataRecipe(microdata);
+    if (mResult && mResult.ingredients.length) return mResult;
+  }
+  var pluginResult = scrapeRecipePlugins(doc);
+  if (pluginResult && pluginResult.ingredients.length) return pluginResult;
+  var contentResult = contentAreaScrape(doc);
+  if (contentResult && contentResult.ingredients.length) return contentResult;
+  return lastResortScrape(doc);
+}
+
+function findRecipeInJsonLd(data) {
+  if (!data) return null;
+  if (isRecipeType(data)) return data;
+  if (Array.isArray(data)) {
+    for (var i = 0; i < data.length; i++) { var f = findRecipeInJsonLd(data[i]); if (f) return f; }
+  }
+  if (data['@graph'] && Array.isArray(data['@graph'])) {
+    for (var j = 0; j < data['@graph'].length; j++) { var g = findRecipeInJsonLd(data['@graph'][j]); if (g) return g; }
+  }
+  return null;
+}
+
+function parseJsonLdRecipe(data) {
+  var name = data.name || '';
+  var ingredients = [];
+  if (data.recipeIngredient) {
+    var raw = Array.isArray(data.recipeIngredient) ? data.recipeIngredient : [data.recipeIngredient];
+    for (var ri = 0; ri < raw.length; ri++) {
+      var ing = raw[ri];
+      if (typeof ing === 'string') { ingredients.push(ing); }
+      else if (ing && typeof ing === 'object') {
+        var parts = [];
+        if (ing.quantity) parts.push(ing.quantity);
+        if (ing.unit) parts.push(ing.unit);
+        if (ing.name) parts.push(ing.name);
+        else if (ing.text) parts.push(ing.text);
+        if (parts.length) ingredients.push(parts.join(' '));
+      }
+    }
+  }
+  var method = [];
+  if (data.recipeInstructions) {
+    if (typeof data.recipeInstructions === 'string') {
+      method = data.recipeInstructions.split(/\n+/).filter(Boolean);
+    } else if (Array.isArray(data.recipeInstructions)) {
+      for (var i = 0; i < data.recipeInstructions.length; i++) {
+        var step = data.recipeInstructions[i];
+        if (!step) continue;
+        if (typeof step === 'string') { method.push(step); }
+        else if (step.text) { method.push(step.text); }
+        else if (step['@type'] === 'HowToSection' && step.itemListElement) {
+          for (var j = 0; j < step.itemListElement.length; j++) {
+            var sub = step.itemListElement[j];
+            if (sub && (sub.text || sub.name)) method.push(sub.text || sub.name);
+          }
+        } else if (step.name) { method.push(step.name); }
+      }
+    }
+  }
+  method = method.map(function(s) { return String(s).replace(/<[^>]+>/g, '').trim(); }).filter(Boolean);
+  ingredients = ingredients.map(function(s) { return String(s).replace(/<[^>]+>/g, '').trim(); }).filter(Boolean);
+  var baseServings = 2;
+  if (data.recipeYield) {
+    var yStr = Array.isArray(data.recipeYield) ? data.recipeYield[0] : data.recipeYield;
+    var m = String(yStr).match(/\d+/);
+    if (m) baseServings = parseInt(m[0]);
+  }
+  return { name: name, ingredients: ingredients, method: method, prepTime: parseDuration(data.prepTime), cookTime: parseDuration(data.cookTime), baseServings: baseServings, category: data.recipeCategory || '' };
+}
+
+function parseDuration(iso) {
+  if (!iso) return '';
+  var m = String(iso).match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (!m) return '';
+  return ((m[1] ? m[1] + 'h ' : '') + (m[2] ? m[2] + ' min' : '')).trim();
+}
+
+function parseMicrodataRecipe(el) {
+  var nameEl = el.querySelector('[itemprop="name"]');
+  var name = nameEl ? nameEl.textContent.trim() : '';
+  var ingEls = el.querySelectorAll('[itemprop="recipeIngredient"],[itemprop="ingredients"]');
+  var ingredients = [];
+  for (var i = 0; i < ingEls.length; i++) ingredients.push(ingEls[i].textContent.trim());
+  var stepEls = el.querySelectorAll('[itemprop="recipeInstructions"] li, [itemprop="step"]');
+  var method = [];
+  for (var j = 0; j < stepEls.length; j++) method.push(stepEls[j].textContent.trim());
+  return { name: name, ingredients: ingredients.filter(Boolean), method: method.filter(Boolean), prepTime: '', cookTime: '', baseServings: 2, category: '' };
+}
+
+function scrapeRecipePlugins(doc) {
+  var wprm = doc.querySelector('.wprm-recipe-container, .wprm-recipe');
+  if (wprm) {
+    var name = '';
+    var nameEl = wprm.querySelector('.wprm-recipe-name');
+    if (nameEl) name = nameEl.textContent.trim();
+    var ingItems = wprm.querySelectorAll('.wprm-recipe-ingredient');
+    var ingredients = [];
+    for (var i = 0; i < ingItems.length; i++) {
+      var amount = ingItems[i].querySelector('.wprm-recipe-ingredient-amount');
+      var unit = ingItems[i].querySelector('.wprm-recipe-ingredient-unit');
+      var iname = ingItems[i].querySelector('.wprm-recipe-ingredient-name');
+      if (amount || iname) {
+        var parts = [];
+        if (amount) parts.push(amount.textContent.trim());
+        if (unit) parts.push(unit.textContent.trim());
+        if (iname) parts.push(iname.textContent.trim());
+        ingredients.push(parts.filter(Boolean).join(' '));
+      } else { ingredients.push(ingItems[i].textContent.trim()); }
+    }
+    var method = [];
+    var stepEls = wprm.querySelectorAll('.wprm-recipe-instruction-text');
+    for (var j = 0; j < stepEls.length; j++) method.push(stepEls[j].textContent.trim());
+    if (ingredients.length || method.length) return { name: name, ingredients: ingredients.filter(Boolean), method: method.filter(Boolean), prepTime: '', cookTime: '', baseServings: 2, category: '' };
+  }
+  var tasty = doc.querySelector('.tasty-recipes');
+  if (tasty) {
+    var tNameEl = tasty.querySelector('.tasty-recipes-title, h2, h3');
+    var tName = tNameEl ? tNameEl.textContent.trim() : '';
+    var tIngEls = tasty.querySelectorAll('.tasty-recipes-ingredients li');
+    var tIng = [];
+    for (var ti = 0; ti < tIngEls.length; ti++) tIng.push(tIngEls[ti].textContent.trim());
+    var tStepEls = tasty.querySelectorAll('.tasty-recipes-instructions li');
+    var tMeth = [];
+    for (var tj = 0; tj < tStepEls.length; tj++) tMeth.push(tStepEls[tj].textContent.trim());
+    if (tIng.length || tMeth.length) return { name: tName, ingredients: tIng.filter(Boolean), method: tMeth.filter(Boolean), prepTime: '', cookTime: '', baseServings: 2, category: '' };
+  }
+  var genericSel = ['.mv-create-card','.cookbook-recipe','.recipe-card','.easyrecipe','.hrecipe','[class*="recipe-card"]','[class*="recipe-content"]','[id*="recipe"]'];
+  for (var s = 0; s < genericSel.length; s++) {
+    var container = doc.querySelector(genericSel[s]);
+    if (!container) continue;
+    var gIngEls = container.querySelectorAll('ul li');
+    var gIng = [];
+    for (var gi = 0; gi < gIngEls.length; gi++) gIng.push(gIngEls[gi].textContent.trim());
+    var gStepEls = container.querySelectorAll('ol li');
+    var gMeth = [];
+    for (var gj = 0; gj < gStepEls.length; gj++) gMeth.push(gStepEls[gj].textContent.trim());
+    if (gIng.length >= 3 && gMeth.length >= 2) {
+      var gNameEl = container.querySelector('h1, h2, h3, h4');
+      return { name: gNameEl ? gNameEl.textContent.trim() : '', ingredients: gIng.filter(Boolean), method: gMeth.filter(Boolean), prepTime: '', cookTime: '', baseServings: 2, category: '' };
+    }
+  }
+  return null;
+}
+
+function contentAreaScrape(doc) {
+  var title = '';
+  var h1 = doc.querySelector('h1');
+  if (h1) title = h1.textContent.trim();
+  var contentAreas = [doc.querySelector('article'), doc.querySelector('.entry-content'), doc.querySelector('.post-content'), doc.querySelector('.content-area'), doc.querySelector('main'), doc.body];
+  for (var ci = 0; ci < contentAreas.length; ci++) {
+    var area = contentAreas[ci];
+    if (!area) continue;
+    var ingredients = findListNearHeading(area, /ingredient/i, 'ul');
+    var method = findListNearHeading(area, /instruction|method|direction|step|preparation/i, 'ol');
+    if (!method.length) method = findListNearHeading(area, /instruction|method|direction|step|preparation/i, 'ul');
+    if (ingredients.length >= 2 && method.length >= 2) return { name: title, ingredients: ingredients, method: method, prepTime: '', cookTime: '', baseServings: 2, category: '' };
+  }
+  return null;
+}
+
+function findListNearHeading(container, headingRegex, listTag) {
+  var headings = container.querySelectorAll('h1,h2,h3,h4,h5,h6');
+  for (var i = 0; i < headings.length; i++) {
+    if (!headingRegex.test(headings[i].textContent.trim())) continue;
+    var el = headings[i].nextElementSibling, tries = 8;
+    while (el && tries > 0) {
+      if (el.tagName === listTag.toUpperCase()) { var items = getListItems(el); if (items.length >= 2) return items; }
+      var nested = el.querySelector(listTag);
+      if (nested) { var nItems = getListItems(nested); if (nItems.length >= 2) return nItems; }
+      el = el.nextElementSibling; tries--;
+    }
+    var parent = headings[i].parentElement;
+    if (parent && parent !== container) {
+      var pNext = parent.nextElementSibling, pTries = 4;
+      while (pNext && pTries > 0) {
+        if (pNext.tagName === listTag.toUpperCase()) { var pItems = getListItems(pNext); if (pItems.length >= 2) return pItems; }
+        var pNested = pNext.querySelector(listTag);
+        if (pNested) { var pNItems = getListItems(pNested); if (pNItems.length >= 2) return pNItems; }
+        pNext = pNext.nextElementSibling; pTries--;
+      }
+    }
+  }
+  return [];
+}
+
+function getListItems(listEl) {
+  var result = [], lis = listEl.children;
+  for (var i = 0; i < lis.length; i++) { if (lis[i].tagName === 'LI') result.push(lis[i].textContent.trim()); }
+  return result.filter(Boolean);
+}
+
+function lastResortScrape(doc) {
+  var title = 'Imported Recipe';
+  var h1 = doc.querySelector('h1');
+  if (h1) title = h1.textContent.trim();
+  var allUl = doc.querySelectorAll('ul');
+  var bestUl = null, bestUlLen = 0;
+  for (var u = 0; u < allUl.length; u++) { var lis = allUl[u].querySelectorAll('li'); if (lis.length > bestUlLen) { bestUlLen = lis.length; bestUl = allUl[u]; } }
+  var bestOl = null;
+  var allOl = doc.querySelectorAll('ol');
+  for (var o = 0; o < allOl.length; o++) { var oLis = allOl[o].querySelectorAll('li'); if (oLis.length >= 3) { bestOl = allOl[o]; break; } }
+  if (!bestUl && !bestOl) return null;
+  var ingredients = bestUl ? getListItems(bestUl) : [];
+  var method = bestOl ? getListItems(bestOl) : [];
+  if (!ingredients.length && !method.length) return null;
+  return { name: title, ingredients: ingredients, method: method, prepTime: '', cookTime: '', baseServings: 2, category: '' };
+}
+
+// ─── Weekly Planner ───────────────────────────────────────────
+var weeklyPlan = {};
+var shoppingChecked = {};
+
+function openShoppingList() {
+  goBackToPlanner();
+  renderPlannerRecipes();
+  showModal('modal-shopping');
+}
+
+function closeShoppingModal() { hideModal('modal-shopping'); }
+
+function renderPlannerRecipes() {
+  var list = document.getElementById('planner-recipe-list');
+  var empty = document.getElementById('planner-empty');
+  if (recipes.length === 0) {
+    list.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  list.style.display = 'block';
+  empty.style.display = 'none';
+
+  list.innerHTML = recipes.map(function(r) {
+    var isSelected = !!weeklyPlan[r.id];
+    var servings = weeklyPlan[r.id] || r.baseServings || 2;
+    return '<div class="planner-entry' + (isSelected ? ' selected' : '') + '" onclick="togglePlanRecipe(\'' + r.id + '\')">' +
+      '<div class="planner-check">' + (isSelected ? '&#10003;' : '') + '</div>' +
+      '<div style="flex:1; min-width:0;">' +
+      '<p style="font-family:\'Cinzel\',serif; font-weight:600; font-size:15px; color:var(--ink);">' + esc(r.name) + '</p>' +
+      '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:13px;">' +
+      (r.category ? r.category : '') +
+      (r.cookTime ? ' · ' + r.cookTime : '') +
+      '</p>' +
+      '</div>' +
+      '<div style="display:flex; align-items:center; gap:6px; flex-shrink:0;" onclick="event.stopPropagation()">' +
+      '<span style="font-family:\'Cinzel\',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-faded);">Serves</span>' +
+      '<button onclick="changePlanServings(\'' + r.id + '\',-1)" class="srv-btn">&minus;</button>' +
+      '<span id="plan-srv-' + r.id + '" style="width:24px; text-align:center; font-family:\'Cinzel\',serif; font-weight:700; color:var(--ink);">' + servings + '</span>' +
+      '<button onclick="changePlanServings(\'' + r.id + '\',1)" class="srv-btn">+</button>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+  updatePlannerCount();
+}
+
+function togglePlanRecipe(id) {
+  var r = recipes.find(function(x) { return x.id === id; });
+  if (!r) return;
+  if (weeklyPlan[id]) { delete weeklyPlan[id]; }
+  else { weeklyPlan[id] = r.baseServings || 2; }
+  renderPlannerRecipes();
+}
+
+function changePlanServings(id, delta) {
+  var current = weeklyPlan[id] || (recipes.find(function(x){return x.id===id;})||{}).baseServings || 2;
+  var next = Math.max(1, Math.min(12, current + delta));
+  if (weeklyPlan[id]) weeklyPlan[id] = next;
+  document.getElementById('plan-srv-' + id).textContent = next;
+}
+
+function updatePlannerCount() {
+  var count = Object.keys(weeklyPlan).length;
+  document.getElementById('planner-selected-count').textContent = count + ' recipe' + (count !== 1 ? 's' : '') + ' selected';
+  document.getElementById('btn-next-step').style.opacity = count === 0 ? '0.4' : '1';
+  document.getElementById('btn-next-step').style.pointerEvents = count === 0 ? 'none' : 'auto';
+}
+
+function goToShoppingList() {
+  if (Object.keys(weeklyPlan).length === 0) return;
+
+  var combined = {};
+  Object.keys(weeklyPlan).forEach(function(rid) {
+    var r = recipes.find(function(x) { return x.id === rid; });
+    if (!r) return;
+    var targetServings = weeklyPlan[rid];
+    r.ingredients.forEach(function(line) {
+      var p = parseIngredient(line);
+      if (!p) return;
+      var scaledLine = scaleIngredient(p, r.baseServings || 2, targetServings);
+      var sp = parseIngredient(scaledLine);
+      var rawName = sp && sp.qty !== null ? sp.name : p.raw;
+      var key = rawName.toLowerCase().trim().replace(/,.*$/, '').replace(/\s+/g, ' ');
+      var normUnit = (sp ? (sp.unit || '') : '').toLowerCase().trim();
+      if (!combined[key]) {
+        combined[key] = { name: rawName.replace(/,.*$/, '').trim(), qty: sp && sp.qty !== null ? (sp.qty || 0) : null, unit: sp ? (sp.unit || '') : '', fromRecipes: [r.name] };
+      } else {
+        if (combined[key].qty !== null && sp && sp.qty !== null && combined[key].unit.toLowerCase() === normUnit) {
+          combined[key].qty += sp.qty;
+        }
+        if (combined[key].fromRecipes.indexOf(r.name) === -1) combined[key].fromRecipes.push(r.name);
+      }
+      if (shoppingChecked[key] === undefined) shoppingChecked[key] = true;
+    });
+  });
+
+  var items = Object.keys(combined).sort().map(function(k) { return Object.assign({ key: k }, combined[k]); });
+
+  document.getElementById('shopping-list-content').innerHTML = items.map(function(item) {
+    var isChecked = shoppingChecked[item.key] !== false;
+    var qtyStr = item.qty !== null ? formatQty(item.qty) + (item.unit || '') : '';
+    var safeId = btoa(encodeURIComponent(item.key)).replace(/[^a-zA-Z0-9]/g,'');
+    return '<div class="shop-item' + (isChecked ? '' : ' shop-unchecked') + '">' +
+      '<div class="shop-check' + (isChecked ? ' checked' : '') + '" onclick="toggleShoppingItem(\'' + item.key.replace(/'/g,"\\'") + '\')" id="chk-' + safeId + '">' +
+      (isChecked ? '&#10003;' : '') +
+      '</div>' +
+      '<div style="flex:1; min-width:0;" id="row-' + safeId + '">' +
+      '<p class="shop-name" style="font-size:16px; color:var(--ink);">' + esc(item.name) + '</p>' +
+      '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:12px;">' + esc(item.fromRecipes.join(', ')) + '</p>' +
+      '</div>' +
+      (qtyStr ? '<span class="ing-qty">' + esc(qtyStr) + '</span>' : '') +
+      '</div>';
+  }).join('');
+
+  // Switch to step 2
+  document.getElementById('planner-step1').style.display = 'none';
+  document.getElementById('planner-step2').style.display = 'block';
+  document.getElementById('planner-footer1').style.display = 'none';
+  document.getElementById('planner-footer2').style.display = 'flex';
+  document.getElementById('step-indicator-2').style.opacity = '1';
+  document.getElementById('step2-circle').style.background = 'var(--accent)';
+  document.getElementById('step2-label').style.color = 'var(--accent)';
+}
+
+function goBackToPlanner() {
+  document.getElementById('planner-step1').style.display = 'block';
+  document.getElementById('planner-step2').style.display = 'none';
+  document.getElementById('planner-footer1').style.display = 'flex';
+  document.getElementById('planner-footer2').style.display = 'none';
+  document.getElementById('step-indicator-2').style.opacity = '0.4';
+  document.getElementById('step2-circle').style.background = 'var(--ink-faded)';
+  document.getElementById('step2-label').style.color = 'var(--ink-faded)';
+}
+
+function toggleShoppingItem(key) {
+  shoppingChecked[key] = !shoppingChecked[key];
+  goToShoppingList(); // re-render
+}
+
+function checkAllShopping(checked) {
+  Object.keys(shoppingChecked).forEach(function(k) { shoppingChecked[k] = checked; });
+  goToShoppingList();
+}
+
+function sendToNotes() {
+  // Collect only checked items
+  var rows = document.getElementById('shopping-list-content').querySelectorAll('[id^="row-"]');
+  var ticked = [];
+  rows.forEach(function(row) {
+    var nameEl = row.querySelector('.shop-name');
+    if (!nameEl) return;
+    var isStrikethrough = nameEl.style.textDecoration === 'line-through' || row.parentElement.classList.contains('shop-unchecked');
+    if (!isStrikethrough) {
+      var parent = row.parentElement;
+      var qtyEl = parent ? parent.querySelector('.ing-qty') : null;
+      var qty = qtyEl ? qtyEl.textContent.trim() : '';
+      var name = nameEl.textContent.trim();
+      ticked.push(qty ? name + ' — ' + qty : name);
+    }
+  });
+
+  if (ticked.length === 0) {
+    alert('No provisions are ticked. Tick the items you need to procure first.');
+    return;
+  }
+
+  var text = ticked.join('\n');
+
+  navigator.clipboard.writeText(text).then(function() {
+    window.location.href = 'notes://';
+    setTimeout(function() {
+      alert('Provisions list copied to clipboard!\n\nNotes should be opening — create a new note and paste (Cmd+V) to add your list.');
+    }, 300);
+  }).catch(function() {
+    window.prompt('Copy this provisions list and paste it into Notes:', text);
+  });
+}
+
+// ─── Export / Import ──────────────────────────────────────────
+function exportData() {
+  var blob = new Blob([JSON.stringify(recipes, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'adventurers-cookbook.json';
+  a.click();
+}
+
+function importData(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    try {
+      var data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw new Error();
+      var existing = new Set(recipes.map(function(r) { return r.name.toLowerCase(); }));
+      var added = 0;
+      data.forEach(function(r) {
+        if (!existing.has(r.name.toLowerCase())) { recipes.push(Object.assign({}, r, { id: r.id || genId() })); added++; }
+      });
+      save(); renderRecipes(); updateSidebarCount();
+      alert('Inscribed ' + added + ' new recipe(s). ' + (data.length - added) + ' duplicate(s) skipped.');
+    } catch(err) { alert('Invalid scroll format.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── Modal Helpers ────────────────────────────────────────────
+function showModal(id) {
+  var el = document.getElementById(id);
+  el.classList.add('open');
+}
+function hideModal(id) {
+  var el = document.getElementById(id);
+  el.classList.remove('open');
+}
+
+// Close modals on backdrop click
+['modal-recipe','modal-import','modal-shopping'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('click', function(e) { if (e.target === el) hideModal(id); });
+});
+
+// ─── Init ─────────────────────────────────────────────────────
+renderRecipes();
+updateSidebarCount();
+</script>
+</body>
+</html>
