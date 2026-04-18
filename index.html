@@ -39,13 +39,11 @@
     background: #2a1810;
     color: var(--ink);
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    padding: 40px 20px;
     background-image:
       radial-gradient(ellipse at 20% 50%, rgba(92,61,46,0.3) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 50%, rgba(92,61,46,0.2) 0%, transparent 60%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
@@ -54,7 +52,7 @@
   .book {
     width: 100%;
     max-width: 1100px;
-    min-height: 85vh;
+    margin: 0 auto;
     position: relative;
     perspective: 2000px;
   }
@@ -62,6 +60,7 @@
   .book-spread {
     display: flex;
     min-height: 85vh;
+    align-items: stretch;
     border-radius: 8px;
     box-shadow:
       0 0 40px rgba(0,0,0,0.5),
@@ -96,13 +95,7 @@
     background: var(--parchment);
     padding: 48px 40px;
     position: relative;
-    overflow-y: auto;
-    max-height: 85vh;
   }
-  .page::-webkit-scrollbar { width: 8px; }
-  .page::-webkit-scrollbar-track { background: var(--parchment-dark); }
-  .page::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
-  .page::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
   /* Parchment noise texture */
   .page::before {
@@ -573,7 +566,7 @@
     .book-spread { flex-direction: column; }
     .book-spine { width: 100%; height: 16px; }
     .book-spine::after { top: 50%; left: 10%; right: 10%; bottom: auto; width: auto; height: 2px; transform: translateY(-50%); }
-    .page { padding: 32px 24px; max-height: none; }
+    .page { padding: 32px 24px; }
     .view.active { flex-direction: column; }
     .page-left { border-right: none; border-bottom: 1px solid var(--parchment-dark); box-shadow: none; }
     .page-right { box-shadow: none; }
