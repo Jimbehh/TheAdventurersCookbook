@@ -6,6 +6,9 @@
 <title>The Adventurer's Cookbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --parchment: #f4e4c1;
@@ -584,6 +587,69 @@
 <!-- ══════════════ THE BOOK ══════════════ -->
 <div class="book">
 
+  <!-- ═══ LOGIN VIEW — Title Page ═══ -->
+  <div id="view-login" class="view">
+    <div class="book-spread">
+      <div class="page page-left" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+        <div class="page-border"></div>
+        <span class="corner-ornament corner-tl">&#10045;</span>
+        <span class="corner-ornament corner-tr">&#10045;</span>
+        <span class="corner-ornament corner-bl">&#10045;</span>
+        <span class="corner-ornament corner-br">&#10045;</span>
+
+        <div class="flourish">&#10040; &#10040; &#10040;</div>
+        <h1 style="font-family:'Cinzel Decorative',cursive; font-size:36px; color:var(--accent); line-height:1.2; margin-bottom:12px;">The Adventurer's<br/>Cookbook</h1>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:16px; max-width:340px; line-height:1.6;">A Collection of Recipes for the Discerning Dungeon Gourmet</p>
+        <div class="flourish">&#10040; &#10040; &#10040;</div>
+
+        <div style="margin-top:32px; font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px; max-width:320px; line-height:1.7;">
+          <p>&quot;Food is the most important thing in life&hellip;<br/>even in a dungeon.&quot;</p>
+        </div>
+      </div>
+
+      <div class="book-spine"></div>
+
+      <div class="page page-right">
+        <div class="page-border"></div>
+        <span class="corner-ornament corner-tl">&#10045;</span>
+        <span class="corner-ornament corner-tr">&#10045;</span>
+        <span class="corner-ornament corner-bl">&#10045;</span>
+        <span class="corner-ornament corner-br">&#10045;</span>
+
+        <div style="text-align:center; margin-bottom:24px;">
+          <p class="section-header" id="auth-title">Enter the Tome</p>
+          <div class="flourish">&#8212; &#10043; &#8212;</div>
+          <p id="auth-subtitle" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:15px; margin-top:8px;">Present thy credentials, adventurer.</p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px; max-width:360px; margin:0 auto;">
+          <div>
+            <label class="field-label">Email</label>
+            <input id="auth-email" type="email" placeholder="scholar@tome.com" class="tome-input" autocomplete="email"/>
+          </div>
+          <div>
+            <label class="field-label">Secret Phrase</label>
+            <input id="auth-password" type="password" placeholder="&bull; &bull; &bull; &bull; &bull; &bull; &bull; &bull;" class="tome-input" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleAuthSubmit()"/>
+          </div>
+          <div id="auth-status" style="font-family:'IM Fell English',serif; font-style:italic; font-size:14px; min-height:20px; text-align:center;"></div>
+
+          <button id="auth-submit" onclick="handleAuthSubmit()" class="btn-accent" style="width:100%; padding:14px;">Enter</button>
+
+          <div style="text-align:center; margin-top:8px;">
+            <button id="auth-toggle" onclick="toggleAuthMode()" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); background:none; border:none; cursor:pointer; font-size:14px; text-decoration:underline;">
+              New adventurer? Create an account
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top:32px; text-align:center; font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:12px; opacity:0.7;">
+          <div class="flourish" style="font-size:14px;">&#10047;</div>
+          Your recipes shall sync across all thy devices.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ LIST VIEW — The Index ═══ -->
   <div id="view-list" class="view active">
     <div class="book-spread">
@@ -645,6 +711,10 @@
 
         <div style="margin-top:auto; padding-top:32px; text-align:center;">
           <p id="sidebar-count" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:13px;"></p>
+          <p id="sidebar-user" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:12px; margin-top:6px; opacity:0.7;"></p>
+          <button onclick="signOut()" class="btn-subtle" style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; font-size:10px;">
+            <span class="material-symbols-outlined" style="font-size:14px;">logout</span> Close Tome
+          </button>
         </div>
       </div>
 
@@ -920,14 +990,181 @@
 
 <!-- ══ JAVASCRIPT ════════════════════════════════════════════ -->
 <script>
+// ─── Firebase Init ───────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyD9P3xNnjk8g4NlUA7TqEadElD4CCLlRMI",
+  authDomain: "adventurers-cookbook.firebaseapp.com",
+  projectId: "adventurers-cookbook",
+  storageBucket: "adventurers-cookbook.firebasestorage.app",
+  messagingSenderId: "1090874186467",
+  appId: "1:1090874186467:web:72f2227293b4c9ee4d43d6"
+};
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.firestore();
+
 // ─── State ───────────────────────────────────────────────────
-var recipes = JSON.parse(localStorage.getItem('recipes') || '[]');
+var recipes = [];
 var servingOverrides = {};
 var currentRecipeId = null;
-var currentView = 'list';
+var currentView = 'login';
+var currentUser = null;
+var recipesUnsub = null;
+var migrationChecked = false;
+var authMode = 'signin'; // or 'signup'
 
-function save() { localStorage.setItem('recipes', JSON.stringify(recipes)); }
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+// ─── Auth ────────────────────────────────────────────────────
+auth.onAuthStateChanged(function(user) {
+  currentUser = user;
+  if (user) {
+    // Logged in
+    document.getElementById('view-login').classList.remove('active');
+    showView('list');
+    subscribeToRecipes(user.uid);
+    var ue = document.getElementById('sidebar-user');
+    if (ue) ue.textContent = user.email;
+  } else {
+    // Logged out
+    recipes = [];
+    if (recipesUnsub) { recipesUnsub(); recipesUnsub = null; }
+    migrationChecked = false;
+    document.getElementById('view-list').classList.remove('active');
+    document.getElementById('view-detail').classList.remove('active');
+    document.getElementById('view-login').classList.add('active');
+    currentView = 'login';
+  }
+});
+
+function toggleAuthMode() {
+  authMode = authMode === 'signin' ? 'signup' : 'signin';
+  if (authMode === 'signup') {
+    document.getElementById('auth-title').textContent = 'Begin Thy Adventure';
+    document.getElementById('auth-subtitle').textContent = 'Create an account to inscribe thy recipes.';
+    document.getElementById('auth-submit').textContent = 'Create Account';
+    document.getElementById('auth-toggle').textContent = 'Already have an account? Sign in';
+  } else {
+    document.getElementById('auth-title').textContent = 'Enter the Tome';
+    document.getElementById('auth-subtitle').textContent = 'Present thy credentials, adventurer.';
+    document.getElementById('auth-submit').textContent = 'Enter';
+    document.getElementById('auth-toggle').textContent = 'New adventurer? Create an account';
+  }
+  document.getElementById('auth-status').textContent = '';
+}
+
+function handleAuthSubmit() {
+  var email = document.getElementById('auth-email').value.trim();
+  var password = document.getElementById('auth-password').value;
+  var status = document.getElementById('auth-status');
+  var btn = document.getElementById('auth-submit');
+
+  if (!email || !password) {
+    status.textContent = 'Please enter both email and secret phrase.';
+    status.className = 'status-err';
+    return;
+  }
+  if (authMode === 'signup' && password.length < 6) {
+    status.textContent = 'Secret phrase must be at least 6 characters.';
+    status.className = 'status-err';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>' + (authMode === 'signup' ? 'Creating...' : 'Entering...');
+  status.textContent = '';
+
+  var promise = authMode === 'signup'
+    ? auth.createUserWithEmailAndPassword(email, password)
+    : auth.signInWithEmailAndPassword(email, password);
+
+  promise.then(function() {
+    status.textContent = '';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('auth-password').value = '';
+  }).catch(function(err) {
+    status.textContent = friendlyAuthError(err);
+    status.className = 'status-err';
+  }).finally(function() {
+    btn.disabled = false;
+    btn.textContent = authMode === 'signup' ? 'Create Account' : 'Enter';
+  });
+}
+
+function friendlyAuthError(err) {
+  var code = err.code || '';
+  if (code.includes('email-already-in-use')) return 'An account already exists for this email.';
+  if (code.includes('invalid-email')) return 'That email address is not valid.';
+  if (code.includes('weak-password')) return 'Secret phrase too weak (min 6 characters).';
+  if (code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'Email or secret phrase is incorrect.';
+  if (code.includes('too-many-requests')) return 'Too many attempts. Try again shortly.';
+  return err.message || 'Something went wrong.';
+}
+
+function signOut() {
+  if (!confirm('Close the tome and sign out?')) return;
+  auth.signOut();
+}
+
+// ─── Firestore Sync ──────────────────────────────────────────
+function subscribeToRecipes(uid) {
+  if (recipesUnsub) recipesUnsub();
+  recipesUnsub = db.collection('users').doc(uid).collection('recipes')
+    .onSnapshot(function(snap) {
+      recipes = [];
+      snap.forEach(function(d) {
+        var data = d.data();
+        if (!data.id) data.id = d.id;
+        recipes.push(data);
+      });
+      if (currentView === 'list') renderRecipes();
+      updateSidebarCount();
+      checkLocalMigration();
+    }, function(err) {
+      console.error('Firestore error', err);
+    });
+}
+
+function saveRecipeToCloud(recipe) {
+  if (!currentUser) return Promise.reject(new Error('Not signed in'));
+  return db.collection('users').doc(currentUser.uid).collection('recipes').doc(recipe.id).set(recipe);
+}
+
+function deleteRecipeFromCloud(id) {
+  if (!currentUser) return Promise.reject(new Error('Not signed in'));
+  return db.collection('users').doc(currentUser.uid).collection('recipes').doc(id).delete();
+}
+
+function checkLocalMigration() {
+  if (migrationChecked) return;
+  migrationChecked = true;
+  var raw = localStorage.getItem('recipes');
+  if (!raw) return;
+  var local = [];
+  try { local = JSON.parse(raw); } catch(e) {}
+  if (!local.length) { localStorage.removeItem('recipes'); return; }
+  if (recipes.length > 0) return; // already have cloud recipes, skip
+
+  if (confirm('Found ' + local.length + ' recipe(s) saved on this device. Move them to thy account?')) {
+    var batch = db.batch();
+    local.forEach(function(r) {
+      var id = r.id || genId();
+      r.id = id;
+      var ref = db.collection('users').doc(currentUser.uid).collection('recipes').doc(id);
+      batch.set(ref, r);
+    });
+    batch.commit().then(function() {
+      localStorage.removeItem('recipes');
+      alert('Migrated ' + local.length + ' recipe(s) to thy account!');
+    }).catch(function(e) {
+      alert('Migration failed: ' + e.message);
+    });
+  } else {
+    if (confirm('Remove the local copies from this device?')) {
+      localStorage.removeItem('recipes');
+    }
+  }
+}
 
 // ─── View Management ─────────────────────────────────────────
 function showView(name) {
@@ -1070,9 +1307,11 @@ function onDetailServingsChange(val) {
 
 function deleteRecipeAndBack(id) {
   if (!confirm('Burn this recipe from the tome? This cannot be undone.')) return;
-  recipes = recipes.filter(function(x) { return x.id !== id; });
-  save();
-  showView('list');
+  deleteRecipeFromCloud(id).then(function() {
+    showView('list');
+  }).catch(function(e) {
+    alert('Delete failed: ' + e.message);
+  });
 }
 
 // ─── US to Metric Conversion ──────────────────────────────────
@@ -1264,17 +1503,22 @@ function saveRecipe() {
   };
 
   var editId = document.getElementById('editId').value;
+  var id = editId || genId();
+  data.id = id;
   if (editId) {
-    var idx = recipes.findIndex(function(x) { return x.id === editId; });
-    if (idx !== -1) recipes[idx] = Object.assign({}, recipes[idx], data);
-  } else {
-    recipes.push(Object.assign({ id: genId() }, data));
+    var existing = recipes.find(function(x) { return x.id === editId; });
+    if (existing) data = Object.assign({}, existing, data);
   }
-  save();
-  closeRecipeModal();
-  if (currentView === 'list') renderRecipes();
-  else if (editId && editId === currentRecipeId) openRecipeDetail(editId);
-  updateSidebarCount();
+
+  saveRecipeToCloud(data).then(function() {
+    closeRecipeModal();
+    if (editId && editId === currentRecipeId && currentView === 'detail') {
+      // small delay to let snapshot update recipes array
+      setTimeout(function() { openRecipeDetail(editId); }, 100);
+    }
+  }).catch(function(e) {
+    alert('Save failed: ' + e.message);
+  });
 }
 
 // ─── Import Modal ─────────────────────────────────────────────
@@ -1797,12 +2041,20 @@ function importData(e) {
       var data = JSON.parse(reader.result);
       if (!Array.isArray(data)) throw new Error();
       var existing = new Set(recipes.map(function(r) { return r.name.toLowerCase(); }));
-      var added = 0;
-      data.forEach(function(r) {
-        if (!existing.has(r.name.toLowerCase())) { recipes.push(Object.assign({}, r, { id: r.id || genId() })); added++; }
+      var toAdd = data.filter(function(r) { return !existing.has((r.name || '').toLowerCase()); });
+      if (!toAdd.length) { alert('No new recipes to inscribe — all duplicates.'); return; }
+      var batch = db.batch();
+      toAdd.forEach(function(r) {
+        var id = r.id || genId();
+        r.id = id;
+        var ref = db.collection('users').doc(currentUser.uid).collection('recipes').doc(id);
+        batch.set(ref, r);
       });
-      save(); renderRecipes(); updateSidebarCount();
-      alert('Inscribed ' + added + ' new recipe(s). ' + (data.length - added) + ' duplicate(s) skipped.');
+      batch.commit().then(function() {
+        alert('Inscribed ' + toAdd.length + ' new recipe(s). ' + (data.length - toAdd.length) + ' duplicate(s) skipped.');
+      }).catch(function(err) {
+        alert('Import failed: ' + err.message);
+      });
     } catch(err) { alert('Invalid scroll format.'); }
   };
   reader.readAsText(file);
@@ -1826,8 +2078,8 @@ function hideModal(id) {
 });
 
 // ─── Init ─────────────────────────────────────────────────────
-renderRecipes();
-updateSidebarCount();
+// Auth listener handles initial view. Default to login view while Firebase checks.
+document.getElementById('view-login').classList.add('active');
 </script>
 </body>
 </html>
