@@ -10,9 +10,7 @@
 <title>The Adventurer's Cookbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --parchment: #f4e4c1;
@@ -1072,18 +1070,13 @@
 
 <!-- ══ JAVASCRIPT ════════════════════════════════════════════ -->
 <script>
-// ─── Firebase Init ───────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyD9P3xNnjk8g4NlUA7TqEadElD4CCLlRMI",
-  authDomain: "adventurers-cookbook.firebaseapp.com",
-  projectId: "adventurers-cookbook",
-  storageBucket: "adventurers-cookbook.firebasestorage.app",
-  messagingSenderId: "1090874186467",
-  appId: "1:1090874186467:web:72f2227293b4c9ee4d43d6"
-};
-firebase.initializeApp(firebaseConfig);
-var auth = firebase.auth();
-var db = firebase.firestore();
+// ─── Supabase Init ───────────────────────────────────────────
+// TODO: paste your values from Supabase → Settings → API
+const SUPABASE_URL = "https://knvrlyosusgssukwumrp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtudnJseW9zdXNnc3N1a3d1bXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MDg1NDYsImV4cCI6MjA5MjA4NDU0Nn0.rDXiHG7DVR_vwwxw2KFUMHdB0eF-TpdMBRZVA_o0r0w";
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true }
+});
 
 // ─── State ───────────────────────────────────────────────────
 var recipes = [];
@@ -1098,17 +1091,16 @@ var authMode = 'signin'; // or 'signup'
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
 // ─── Auth ────────────────────────────────────────────────────
-auth.onAuthStateChanged(function(user) {
+function handleAuthSession(session) {
+  var user = session ? session.user : null;
   currentUser = user;
   if (user) {
-    // Logged in
     document.getElementById('view-login').classList.remove('active');
     showView('list');
-    subscribeToRecipes(user.uid);
+    subscribeToRecipes(user.id);
     var ue = document.getElementById('sidebar-user');
     if (ue) ue.textContent = user.email;
   } else {
-    // Logged out
     recipes = [];
     if (recipesUnsub) { recipesUnsub(); recipesUnsub = null; }
     migrationChecked = false;
@@ -1117,7 +1109,9 @@ auth.onAuthStateChanged(function(user) {
     document.getElementById('view-login').classList.add('active');
     currentView = 'login';
   }
-});
+}
+sb.auth.getSession().then(function(res) { handleAuthSession(res.data.session); });
+sb.auth.onAuthStateChange(function(_event, session) { handleAuthSession(session); });
 
 function toggleAuthMode() {
   authMode = authMode === 'signin' ? 'signup' : 'signin';
@@ -1157,11 +1151,17 @@ function handleAuthSubmit() {
   status.textContent = '';
 
   var promise = authMode === 'signup'
-    ? auth.createUserWithEmailAndPassword(email, password)
-    : auth.signInWithEmailAndPassword(email, password);
+    ? sb.auth.signUp({ email: email, password: password })
+    : sb.auth.signInWithPassword({ email: email, password: password });
 
-  promise.then(function() {
-    status.textContent = '';
+  promise.then(function(res) {
+    if (res.error) throw res.error;
+    if (authMode === 'signup' && res.data && res.data.user && !res.data.session) {
+      status.textContent = 'Account created! Check thy email to confirm, then sign in.';
+      status.className = 'status-ok';
+    } else {
+      status.textContent = '';
+    }
     document.getElementById('auth-email').value = '';
     document.getElementById('auth-password').value = '';
   }).catch(function(err) {
@@ -1174,47 +1174,77 @@ function handleAuthSubmit() {
 }
 
 function friendlyAuthError(err) {
-  var code = err.code || '';
-  if (code.includes('email-already-in-use')) return 'An account already exists for this email.';
-  if (code.includes('invalid-email')) return 'That email address is not valid.';
-  if (code.includes('weak-password')) return 'Secret phrase too weak (min 6 characters).';
-  if (code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) return 'Email or secret phrase is incorrect.';
-  if (code.includes('too-many-requests')) return 'Too many attempts. Try again shortly.';
+  var msg = (err && err.message ? err.message : '').toLowerCase();
+  if (msg.includes('already registered') || msg.includes('already been registered')) return 'An account already exists for this email.';
+  if (msg.includes('invalid email')) return 'That email address is not valid.';
+  if (msg.includes('password') && msg.includes('6')) return 'Secret phrase too weak (min 6 characters).';
+  if (msg.includes('invalid login') || msg.includes('invalid credentials')) return 'Email or secret phrase is incorrect.';
+  if (msg.includes('rate') || msg.includes('too many')) return 'Too many attempts. Try again shortly.';
+  if (msg.includes('email not confirmed')) return 'Please confirm thy email first (check thy inbox).';
   return err.message || 'Something went wrong.';
 }
 
 function signOut() {
   if (!confirm('Close the tome and sign out?')) return;
-  auth.signOut();
+  sb.auth.signOut();
 }
 
-// ─── Firestore Sync ──────────────────────────────────────────
+// ─── Supabase Sync ───────────────────────────────────────────
+// Table: recipes (id text pk, user_id uuid, data jsonb, updated_at timestamptz)
+function rowsToRecipes(rows) {
+  return (rows || []).map(function(row) {
+    var r = row.data || {};
+    r.id = row.id;
+    return r;
+  });
+}
+
+function refreshRecipes() {
+  if (!currentUser) return Promise.resolve();
+  return sb.from('recipes').select('*').eq('user_id', currentUser.id).then(function(res) {
+    if (res.error) { console.error('Supabase fetch error', res.error); return; }
+    recipes = rowsToRecipes(res.data);
+    if (currentView === 'list') renderRecipes();
+    updateSidebarCount();
+    checkLocalMigration();
+  });
+}
+
 function subscribeToRecipes(uid) {
-  if (recipesUnsub) recipesUnsub();
-  recipesUnsub = db.collection('users').doc(uid).collection('recipes')
-    .onSnapshot(function(snap) {
-      recipes = [];
-      snap.forEach(function(d) {
-        var data = d.data();
-        if (!data.id) data.id = d.id;
-        recipes.push(data);
-      });
-      if (currentView === 'list') renderRecipes();
-      updateSidebarCount();
-      checkLocalMigration();
-    }, function(err) {
-      console.error('Firestore error', err);
-    });
+  if (recipesUnsub) { recipesUnsub(); recipesUnsub = null; }
+  refreshRecipes();
+  var channel = sb.channel('recipes-' + uid)
+    .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'recipes', filter: 'user_id=eq.' + uid },
+        function() { refreshRecipes(); })
+    .subscribe();
+  recipesUnsub = function() { sb.removeChannel(channel); };
 }
 
 function saveRecipeToCloud(recipe) {
   if (!currentUser) return Promise.reject(new Error('Not signed in'));
-  return db.collection('users').doc(currentUser.uid).collection('recipes').doc(recipe.id).set(recipe);
+  var id = recipe.id;
+  var row = { id: id, user_id: currentUser.id, data: recipe, updated_at: new Date().toISOString() };
+  return sb.from('recipes').upsert(row).then(function(res) {
+    if (res.error) throw res.error;
+    // optimistic local update so UI doesn't wait for realtime
+    var idx = recipes.findIndex(function(r) { return r.id === id; });
+    if (idx >= 0) recipes[idx] = recipe; else recipes.push(recipe);
+    if (currentView === 'list') renderRecipes();
+    updateSidebarCount();
+    return res;
+  });
 }
 
 function deleteRecipeFromCloud(id) {
   if (!currentUser) return Promise.reject(new Error('Not signed in'));
-  return db.collection('users').doc(currentUser.uid).collection('recipes').doc(id).delete();
+  return sb.from('recipes').delete().eq('id', id).eq('user_id', currentUser.id).then(function(res) {
+    if (res.error) throw res.error;
+    recipes = recipes.filter(function(r) { return r.id !== id; });
+    if (currentView === 'list') renderRecipes();
+    updateSidebarCount();
+    return res;
+  });
 }
 
 function checkLocalMigration() {
@@ -1228,16 +1258,16 @@ function checkLocalMigration() {
   if (recipes.length > 0) return; // already have cloud recipes, skip
 
   if (confirm('Found ' + local.length + ' recipe(s) saved on this device. Move them to thy account?')) {
-    var batch = db.batch();
-    local.forEach(function(r) {
+    var rows = local.map(function(r) {
       var id = r.id || genId();
       r.id = id;
-      var ref = db.collection('users').doc(currentUser.uid).collection('recipes').doc(id);
-      batch.set(ref, r);
+      return { id: id, user_id: currentUser.id, data: r, updated_at: new Date().toISOString() };
     });
-    batch.commit().then(function() {
+    sb.from('recipes').upsert(rows).then(function(res) {
+      if (res.error) throw res.error;
       localStorage.removeItem('recipes');
       alert('Migrated ' + local.length + ' recipe(s) to thy account!');
+      refreshRecipes();
     }).catch(function(e) {
       alert('Migration failed: ' + e.message);
     });
@@ -2140,15 +2170,15 @@ function importData(e) {
       var existing = new Set(recipes.map(function(r) { return r.name.toLowerCase(); }));
       var toAdd = data.filter(function(r) { return !existing.has((r.name || '').toLowerCase()); });
       if (!toAdd.length) { alert('No new recipes to inscribe — all duplicates.'); return; }
-      var batch = db.batch();
-      toAdd.forEach(function(r) {
+      var rows = toAdd.map(function(r) {
         var id = r.id || genId();
         r.id = id;
-        var ref = db.collection('users').doc(currentUser.uid).collection('recipes').doc(id);
-        batch.set(ref, r);
+        return { id: id, user_id: currentUser.id, data: r, updated_at: new Date().toISOString() };
       });
-      batch.commit().then(function() {
+      sb.from('recipes').upsert(rows).then(function(res) {
+        if (res.error) throw res.error;
         alert('Inscribed ' + toAdd.length + ' new recipe(s). ' + (data.length - toAdd.length) + ' duplicate(s) skipped.');
+        refreshRecipes();
       }).catch(function(err) {
         alert('Import failed: ' + err.message);
       });
@@ -2175,7 +2205,7 @@ function hideModal(id) {
 });
 
 // ─── Init ─────────────────────────────────────────────────────
-// Auth listener handles initial view. Default to login view while Firebase checks.
+// Auth listener handles initial view. Default to login view while Supabase checks.
 document.getElementById('view-login').classList.add('active');
 </script>
 </body>
