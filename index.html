@@ -660,6 +660,91 @@
     .step-text { font-size: 16px; }
     .ing-name { font-size: 16px; }
   }
+
+  /* ═══ Social Features ═══ */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 3px 8px;
+    border: 1px solid var(--gold-dark); color: var(--ink-faded);
+    background: rgba(160, 128, 48, 0.08);
+  }
+  .badge .material-symbols-outlined { font-size: 12px; }
+  .badge-public { color: var(--forest); border-color: var(--forest); }
+  .badge-shared { color: var(--accent); border-color: var(--accent); }
+
+  .star-row { display: inline-flex; gap: 2px; align-items: center; }
+  .star-btn {
+    background: none; border: none; cursor: pointer; padding: 2px;
+    color: var(--ink-faded); font-size: 22px; line-height: 1;
+    transition: transform 0.1s, color 0.15s;
+  }
+  .star-btn:hover { transform: scale(1.2); color: var(--gold-dark); }
+  .star-btn.filled { color: #c9a035; }
+  .star-btn.readonly { cursor: default; }
+  .star-btn.readonly:hover { transform: none; }
+
+  .rating-summary {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'IM Fell English', serif; font-style: italic;
+    color: var(--ink-faded); font-size: 14px;
+  }
+  .rating-summary .star-row .star-btn { font-size: 16px; }
+
+  .social-section {
+    margin-top: 20px; padding: 16px;
+    border: 1px solid var(--gold-dark);
+    background: rgba(244, 228, 193, 0.4);
+  }
+  .social-section-title {
+    font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--ink-faded); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .collab-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'IM Fell English', serif; font-size: 13px;
+    padding: 4px 10px; border: 1px solid var(--gold-dark);
+    background: var(--parchment-light); color: var(--ink); margin: 3px;
+  }
+  .collab-chip button {
+    background: none; border: none; cursor: pointer; color: var(--accent);
+    font-size: 14px; padding: 0; line-height: 1;
+  }
+
+  .review-item {
+    padding: 10px 0; border-top: 1px dashed var(--gold-dark);
+    font-family: 'IM Fell English', serif;
+  }
+  .review-item:first-child { border-top: none; }
+  .review-author {
+    font-size: 12px; color: var(--ink-faded); font-style: italic;
+    margin-top: 4px;
+  }
+  .review-text { font-size: 15px; color: var(--ink); margin-top: 4px; }
+
+  .community-card {
+    padding: 14px 16px; border: 1px solid var(--gold-dark);
+    background: var(--parchment-light); margin-bottom: 10px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .community-card:hover { background: var(--parchment-dark); }
+  .community-card-title {
+    font-family: 'Cinzel Decorative', cursive; font-size: 16px;
+    color: var(--accent); margin-bottom: 4px;
+  }
+  .community-card-meta {
+    font-family: 'IM Fell English', serif; font-style: italic;
+    color: var(--ink-faded); font-size: 13px;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  }
+
+  .status-ok { color: var(--forest); }
+
+  .index-entry-badges {
+    margin-left: 8px; display: inline-flex; gap: 4px; vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -766,6 +851,9 @@
               <span class="material-symbols-outlined" style="font-size:16px;">shopping_cart</span> Provisions
             </button>
           </div>
+          <button onclick="openCommunityTome()" class="btn-tome" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">public</span> Community Tome
+          </button>
         </div>
 
         <hr class="ruled-line"/>
@@ -865,14 +953,56 @@
         </div>
 
         <!-- Actions -->
-        <div style="display:flex; gap:8px; margin-top:24px;">
-          <button onclick="openEditModal(currentRecipeId)" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
-            <span class="material-symbols-outlined" style="font-size:16px;">edit</span> Amend
-          </button>
-          <button onclick="deleteRecipeAndBack(currentRecipeId)" class="btn-subtle" style="display:flex; align-items:center; justify-content:center; gap:6px; border-color:var(--accent); color:var(--accent);">
-            <span class="material-symbols-outlined" style="font-size:16px;">delete</span> Burn
-          </button>
+        <div id="detail-actions" style="display:flex; gap:8px; margin-top:24px; flex-wrap:wrap;"></div>
+
+        <!-- Social: Share / Visibility (owner only) -->
+        <div id="detail-share-section" class="social-section" style="display:none;">
+          <p class="social-section-title">
+            <span class="material-symbols-outlined" style="font-size:14px;">share</span> Share this Scroll
+          </p>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-family:'IM Fell English',serif; font-size:14px;">
+              <input id="visibility-toggle" type="checkbox" onchange="toggleVisibility(this.checked)" style="cursor:pointer;"/>
+              <span id="visibility-label">Make public</span>
+            </label>
+            <button id="copy-link-btn" onclick="copyShareLink()" class="btn-subtle" style="display:none; display:inline-flex; align-items:center; gap:4px;">
+              <span class="material-symbols-outlined" style="font-size:14px;">link</span> Copy link
+            </button>
+          </div>
+          <p id="share-status" style="font-family:'IM Fell English',serif; font-style:italic; font-size:12px; color:var(--ink-faded); margin-top:6px;"></p>
         </div>
+
+        <!-- Social: Collaborators (owner only) -->
+        <div id="detail-collab-section" class="social-section" style="display:none;">
+          <p class="social-section-title">
+            <span class="material-symbols-outlined" style="font-size:14px;">group</span> Co-Authors
+          </p>
+          <div id="collab-list" style="margin-bottom:8px;"></div>
+          <div style="display:flex; gap:6px;">
+            <input id="collab-email" type="email" placeholder="friend@example.com" class="tome-input" style="flex:1; font-size:13px;"/>
+            <button onclick="addCollaborator()" class="btn-tome" style="font-size:10px;">Add</button>
+          </div>
+          <p id="collab-status" style="font-family:'IM Fell English',serif; font-style:italic; font-size:12px; color:var(--ink-faded); margin-top:6px;"></p>
+        </div>
+
+        <!-- Social: Ratings -->
+        <div id="detail-ratings-section" class="social-section" style="display:none;">
+          <p class="social-section-title">
+            <span class="material-symbols-outlined" style="font-size:14px;">star_rate</span> Ratings &amp; Reviews
+          </p>
+          <div id="ratings-summary" style="margin-bottom:10px;"></div>
+          <div id="ratings-my-entry" style="display:none; padding:10px 0; border-top:1px dashed var(--gold-dark);">
+            <p style="font-family:'Cinzel',serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-faded); margin-bottom:6px;">Thy verdict</p>
+            <div id="my-star-row" class="star-row"></div>
+            <textarea id="my-review" rows="2" placeholder="A word or two on thy experience..." class="tome-textarea" style="font-size:13px; margin-top:8px;"></textarea>
+            <div style="display:flex; gap:6px; margin-top:8px;">
+              <button onclick="submitRating()" class="btn-accent" style="font-size:10px;">Submit</button>
+              <button id="delete-rating-btn" onclick="deleteMyRating()" class="btn-subtle" style="display:none; font-size:10px; color:var(--accent); border-color:var(--accent);">Remove</button>
+            </div>
+          </div>
+          <div id="ratings-list" style="margin-top:10px;"></div>
+        </div>
+
       </div>
 
       <!-- Spine -->
@@ -1068,6 +1198,31 @@
   </div>
 </div>
 
+<!-- ══ MODAL: COMMUNITY TOME ══════════════════════════════════ -->
+<div id="modal-community" class="modal-overlay">
+  <div class="modal-scroll" style="max-width:700px; display:flex; flex-direction:column; max-height:90vh;">
+    <div style="flex-shrink:0;">
+      <div style="display:flex; justify-content:flex-end;">
+        <button onclick="hideModal('modal-community')" style="background:none; border:none; cursor:pointer; color:var(--ink-faded);">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div style="text-align:center; margin-bottom:16px;">
+        <h2 style="font-family:'Cinzel Decorative',cursive; font-size:22px; color:var(--accent);">The Community Tome</h2>
+        <div class="flourish">&#8212; &#10043; &#8212;</div>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px; margin-top:4px;">Scrolls shared by fellow adventurers.</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; border:1px solid var(--gold-dark); padding:8px 12px; margin-bottom:12px;">
+        <span class="material-symbols-outlined" style="color:var(--ink-faded); font-size:18px;">search</span>
+        <input id="communitySearch" class="tome-input" style="border:none; padding:0; background:transparent;" placeholder="Search community scrolls..." oninput="renderCommunityList()" type="text"/>
+      </div>
+    </div>
+    <div id="community-list" style="flex:1; overflow-y:auto;">
+      <p style="text-align:center; color:var(--ink-faded); font-family:'IM Fell English',serif; font-style:italic; padding:20px;">Gathering scrolls from the realm...</p>
+    </div>
+  </div>
+</div>
+
 <!-- ══ JAVASCRIPT ════════════════════════════════════════════ -->
 <script>
 // ─── Supabase Init ───────────────────────────────────────────
@@ -1191,23 +1346,77 @@ function signOut() {
 
 // ─── Supabase Sync ───────────────────────────────────────────
 // Table: recipes (id text pk, user_id uuid, data jsonb, updated_at timestamptz)
-function rowsToRecipes(rows) {
-  return (rows || []).map(function(row) {
-    var r = row.data || {};
-    r.id = row.id;
-    return r;
-  });
+function rowToRecipe(row) {
+  var r = row.data || {};
+  r.id = row.id;
+  r._ownerId = row.user_id;
+  r._visibility = row.visibility || 'private';
+  return r;
 }
+function rowsToRecipes(rows) { return (rows || []).map(rowToRecipe); }
+
+// Cache of ratings aggregates: { recipe_id: { avg, count } }
+var ratingsAgg = {};
+// Cache of profiles: { user_id: { email, display_name } }
+var profilesCache = {};
 
 function refreshRecipes() {
   if (!currentUser) return Promise.resolve();
-  return sb.from('recipes').select('*').eq('user_id', currentUser.id).then(function(res) {
-    if (res.error) { console.error('Supabase fetch error', res.error); return; }
-    recipes = rowsToRecipes(res.data);
+  // RLS lets through: own + collaborated + public. Filter out public-not-mine client-side.
+  return sb.from('recipes').select('*').then(function(res) {
+      if (res.error) { console.error('Supabase fetch error', res.error); return; }
+      // Include: mine + ones I collaborate on. Exclude: public from others (those show in Community).
+      var allRows = res.data || [];
+      // We'll need collaborator info to know which non-owned rows are collab vs public
+      return sb.from('recipe_collaborators').select('recipe_id').eq('user_id', currentUser.id).then(function(cr) {
+        var collabIds = new Set((cr.data || []).map(function(x) { return x.recipe_id; }));
+        var mine = allRows.filter(function(row) {
+          return row.user_id === currentUser.id || collabIds.has(row.id);
+        });
+        mine.forEach(function(row) { row._isCollab = (row.user_id !== currentUser.id); });
+        recipes = mine.map(function(row) {
+          var r = rowToRecipe(row);
+          r._isCollab = row._isCollab;
+          return r;
+        });
+        if (currentView === 'list') renderRecipes();
+        updateSidebarCount();
+        checkLocalMigration();
+        refreshRatingsAgg();
+      });
+    });
+}
+
+function refreshRatingsAgg() {
+  return sb.from('recipe_ratings').select('recipe_id,rating').then(function(res) {
+    if (res.error) { console.error('Ratings fetch', res.error); return; }
+    ratingsAgg = {};
+    (res.data || []).forEach(function(r) {
+      if (!ratingsAgg[r.recipe_id]) ratingsAgg[r.recipe_id] = { sum: 0, count: 0 };
+      ratingsAgg[r.recipe_id].sum += r.rating;
+      ratingsAgg[r.recipe_id].count += 1;
+    });
+    Object.keys(ratingsAgg).forEach(function(id) {
+      var a = ratingsAgg[id];
+      a.avg = a.sum / a.count;
+    });
     if (currentView === 'list') renderRecipes();
-    updateSidebarCount();
-    checkLocalMigration();
   });
+}
+
+function fetchProfiles(userIds) {
+  var missing = userIds.filter(function(id) { return id && !profilesCache[id]; });
+  if (!missing.length) return Promise.resolve();
+  return sb.from('profiles').select('*').in('id', missing).then(function(res) {
+    (res.data || []).forEach(function(p) { profilesCache[p.id] = p; });
+  });
+}
+
+function profileLabel(userId) {
+  if (userId === currentUser.id) return 'Thyself';
+  var p = profilesCache[userId];
+  if (!p) return 'Unknown adventurer';
+  return p.display_name || p.email || 'Adventurer';
 }
 
 function subscribeToRecipes(uid) {
@@ -1224,10 +1433,18 @@ function subscribeToRecipes(uid) {
 function saveRecipeToCloud(recipe) {
   if (!currentUser) return Promise.reject(new Error('Not signed in'));
   var id = recipe.id;
-  var row = { id: id, user_id: currentUser.id, data: recipe, updated_at: new Date().toISOString() };
+  // Find existing to preserve owner_id if this is a collab edit
+  var existing = recipes.find(function(r) { return r.id === id; });
+  var ownerId = existing && existing._ownerId ? existing._ownerId : currentUser.id;
+  var visibility = existing && existing._visibility ? existing._visibility : 'private';
+  // Strip internal fields before saving to JSONB
+  var clean = Object.assign({}, recipe);
+  delete clean._ownerId; delete clean._visibility; delete clean._isCollab;
+  var row = { id: id, user_id: ownerId, data: clean, visibility: visibility, updated_at: new Date().toISOString() };
   return sb.from('recipes').upsert(row).then(function(res) {
     if (res.error) throw res.error;
-    // optimistic local update so UI doesn't wait for realtime
+    recipe._ownerId = ownerId;
+    recipe._visibility = visibility;
     var idx = recipes.findIndex(function(r) { return r.id === id; });
     if (idx >= 0) recipes[idx] = recipe; else recipes.push(recipe);
     if (currentView === 'list') renderRecipes();
@@ -1317,6 +1534,7 @@ function renderRecipes(query) {
   var grid = document.getElementById('recipeGrid');
   var subtitle = document.getElementById('header-subtitle');
   var filtered = recipes.filter(function(r) {
+    if (r._external) return false;
     return r.name.toLowerCase().includes(query) ||
       (r.category || '').toLowerCase().includes(query) ||
       r.ingredients.some(function(i) { return i.toLowerCase().includes(query); });
@@ -1345,14 +1563,19 @@ function renderRecipes(query) {
     details.push('Serves ' + servings);
     details.push(ingCount + ' ingredients');
 
+    var badges = '';
+    if (r._isCollab) badges += '<span class="badge badge-shared"><span class="material-symbols-outlined">group</span> Shared</span>';
+    if (r._visibility === 'public' && r._ownerId === currentUser.id) badges += '<span class="badge badge-public"><span class="material-symbols-outlined">public</span> Public</span>';
+    var agg = ratingsAgg[r.id];
+    var ratingBit = agg && agg.count ? ' · ★ ' + agg.avg.toFixed(1) + ' (' + agg.count + ')' : '';
     return '<div class="index-entry" onclick="openRecipeDetail(\'' + r.id + '\')">' +
       '<div style="display:flex; align-items:baseline;">' +
       '<span class="index-num">' + String(idx + 1).padStart(2, '0') + '.</span>' +
-      '<span class="index-name">' + esc(r.name) + '</span>' +
+      '<span class="index-name">' + esc(r.name) + (badges ? '<span class="index-entry-badges">' + badges + '</span>' : '') + '</span>' +
       '<span class="index-dots"></span>' +
       '<span class="index-page">' + ingCount + '</span>' +
       '</div>' +
-      '<div class="index-detail">' + esc(details.join(' · ')) + '</div>' +
+      '<div class="index-detail">' + esc(details.join(' · ')) + ratingBit + '</div>' +
       '</div>';
   }).join('');
 }
@@ -1391,8 +1614,95 @@ function openRecipeDetail(id) {
 
   renderDetailIngredients(r, servings);
   renderDetailMethod(r, servings);
+  renderSocialSections(r);
   showView('detail');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Social Section Rendering ─────────────────────────────────
+function renderSocialSections(r) {
+  var isOwner = (r._ownerId === currentUser.id);
+  var isCollab = !!r._isCollab;
+  var canEdit = isOwner || isCollab;
+
+  // Action buttons — tailor by role
+  var actions = '';
+  if (canEdit) {
+    actions += '<button onclick="openEditModal(currentRecipeId)" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span> Amend</button>';
+  }
+  if (isOwner) {
+    actions += '<button onclick="deleteRecipeAndBack(currentRecipeId)" class="btn-subtle" style="display:flex; align-items:center; justify-content:center; gap:6px; border-color:var(--accent); color:var(--accent);"><span class="material-symbols-outlined" style="font-size:16px;">delete</span> Burn</button>';
+  }
+  if (!isOwner) {
+    // Fork/save-to-my-tome
+    actions += '<button onclick="forkRecipe(currentRecipeId)" class="btn-accent" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;"><span class="material-symbols-outlined" style="font-size:16px;">bookmark_add</span> Save Copy</button>';
+  }
+  document.getElementById('detail-actions').innerHTML = actions;
+
+  // Tags: add visibility / shared badges into the tag row
+  var tagEl = document.getElementById('detail-tags');
+  if (r._visibility === 'public') {
+    tagEl.innerHTML += '<span class="badge badge-public"><span class="material-symbols-outlined">public</span> Public</span>';
+  } else if (isOwner) {
+    tagEl.innerHTML += '<span class="badge"><span class="material-symbols-outlined">lock</span> Private</span>';
+  }
+  if (!isOwner) {
+    var author = profileLabel(r._ownerId);
+    tagEl.innerHTML += '<span class="badge badge-shared"><span class="material-symbols-outlined">' + (isCollab ? 'group' : 'person') + '</span> ' + esc(author) + '</span>';
+  }
+
+  // Share section — owner only
+  var shareSec = document.getElementById('detail-share-section');
+  if (isOwner) {
+    shareSec.style.display = 'block';
+    var toggle = document.getElementById('visibility-toggle');
+    toggle.checked = (r._visibility === 'public');
+    document.getElementById('visibility-label').textContent = toggle.checked ? 'Public (anyone can find it)' : 'Make public';
+    document.getElementById('copy-link-btn').style.display = toggle.checked ? 'inline-flex' : 'none';
+    document.getElementById('share-status').textContent = '';
+  } else {
+    shareSec.style.display = 'none';
+  }
+
+  // Collaborators section — owner only
+  var collabSec = document.getElementById('detail-collab-section');
+  if (isOwner) {
+    collabSec.style.display = 'block';
+    document.getElementById('collab-email').value = '';
+    document.getElementById('collab-status').textContent = '';
+    renderCollaborators(r.id);
+  } else {
+    collabSec.style.display = 'none';
+  }
+
+  // Ratings section — show for public recipes & recipes I collaborate on
+  var ratingsSec = document.getElementById('detail-ratings-section');
+  if (r._visibility === 'public' || isCollab || !isOwner) {
+    ratingsSec.style.display = 'block';
+    renderRatings(r);
+  } else {
+    // For private owner-only recipes, hide ratings
+    ratingsSec.style.display = 'none';
+  }
+}
+
+function forkRecipe(id) {
+  var r = recipes.find(function(x) { return x.id === id; });
+  if (!r) return;
+  if (!confirm('Copy "' + r.name + '" into thy personal tome?')) return;
+  var copy = JSON.parse(JSON.stringify(r));
+  delete copy._ownerId; delete copy._visibility; delete copy._isCollab;
+  copy.id = genId();
+  copy.name = r.name; // keep name
+  var row = { id: copy.id, user_id: currentUser.id, data: copy, visibility: 'private', updated_at: new Date().toISOString() };
+  sb.from('recipes').insert(row).then(function(res) {
+    if (res.error) { alert('Copy failed: ' + res.error.message); return; }
+    copy._ownerId = currentUser.id;
+    copy._visibility = 'private';
+    recipes.push(copy);
+    alert('Copied to thy tome!');
+    openRecipeDetail(copy.id);
+  });
 }
 
 function renderDetailIngredients(r, servings) {
@@ -2199,14 +2509,289 @@ function hideModal(id) {
 }
 
 // Close modals on backdrop click
-['modal-recipe','modal-import','modal-shopping'].forEach(function(id) {
+['modal-recipe','modal-import','modal-shopping','modal-community'].forEach(function(id) {
   var el = document.getElementById(id);
   if (el) el.addEventListener('click', function(e) { if (e.target === el) hideModal(id); });
 });
 
+// ─── Social: Share / Visibility ──────────────────────────────
+function toggleVisibility(makePublic) {
+  var r = recipes.find(function(x) { return x.id === currentRecipeId; });
+  if (!r) return;
+  var newVis = makePublic ? 'public' : 'private';
+  sb.from('recipes').update({ visibility: newVis }).eq('id', r.id).then(function(res) {
+    if (res.error) {
+      document.getElementById('share-status').textContent = 'Failed: ' + res.error.message;
+      document.getElementById('visibility-toggle').checked = (r._visibility === 'public');
+      return;
+    }
+    r._visibility = newVis;
+    document.getElementById('visibility-label').textContent = makePublic ? 'Public (anyone can find it)' : 'Make public';
+    document.getElementById('copy-link-btn').style.display = makePublic ? 'inline-flex' : 'none';
+    document.getElementById('share-status').textContent = makePublic ? 'This scroll is now visible in the Community Tome.' : 'This scroll is now private.';
+    // refresh tag badges
+    document.getElementById('detail-tags').innerHTML = document.getElementById('detail-tags').innerHTML; // no-op; tags set on open
+  });
+}
+
+function copyShareLink() {
+  var r = recipes.find(function(x) { return x.id === currentRecipeId; });
+  if (!r) return;
+  var base = location.origin + location.pathname;
+  var url = base + '?recipe=' + encodeURIComponent(r.id);
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      document.getElementById('share-status').textContent = 'Link copied! Share it with fellow adventurers.';
+    });
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+// ─── Social: Collaborators ────────────────────────────────────
+function renderCollaborators(recipeId) {
+  var el = document.getElementById('collab-list');
+  el.innerHTML = '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:13px;">Loading...</span>';
+  sb.from('recipe_collaborators').select('user_id').eq('recipe_id', recipeId).then(function(res) {
+    if (res.error) { el.textContent = ''; return; }
+    var collabs = res.data || [];
+    if (!collabs.length) {
+      el.innerHTML = '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:13px;">No co-authors yet.</span>';
+      return;
+    }
+    fetchProfiles(collabs.map(function(c) { return c.user_id; })).then(function() {
+      el.innerHTML = collabs.map(function(c) {
+        var label = profileLabel(c.user_id);
+        return '<span class="collab-chip">' + esc(label) +
+          ' <button onclick="removeCollaborator(\'' + recipeId + '\',\'' + c.user_id + '\')" title="Remove">' +
+          '<span class="material-symbols-outlined" style="font-size:14px;">close</span></button></span>';
+      }).join('');
+    });
+  });
+}
+
+function addCollaborator() {
+  var email = (document.getElementById('collab-email').value || '').trim().toLowerCase();
+  var status = document.getElementById('collab-status');
+  if (!email) { status.textContent = 'Enter an email.'; return; }
+  status.textContent = 'Searching the registry...';
+  sb.from('profiles').select('id,email').eq('email', email).limit(1).then(function(res) {
+    if (res.error) { status.textContent = 'Error: ' + res.error.message; return; }
+    var user = (res.data || [])[0];
+    if (!user) { status.textContent = 'No adventurer found with that email. Have they signed up?'; return; }
+    if (user.id === currentUser.id) { status.textContent = 'You are already the owner!'; return; }
+    sb.from('recipe_collaborators').insert({ recipe_id: currentRecipeId, user_id: user.id }).then(function(r2) {
+      if (r2.error) {
+        if ((r2.error.message || '').includes('duplicate')) status.textContent = 'Already a co-author.';
+        else status.textContent = 'Failed: ' + r2.error.message;
+        return;
+      }
+      status.textContent = 'Added!';
+      document.getElementById('collab-email').value = '';
+      renderCollaborators(currentRecipeId);
+    });
+  });
+}
+
+function removeCollaborator(recipeId, userId) {
+  if (!confirm('Remove this co-author?')) return;
+  sb.from('recipe_collaborators').delete().eq('recipe_id', recipeId).eq('user_id', userId).then(function(res) {
+    if (res.error) { alert('Remove failed: ' + res.error.message); return; }
+    renderCollaborators(recipeId);
+  });
+}
+
+// ─── Social: Ratings ──────────────────────────────────────────
+function starRowHtml(current, onClick) {
+  var html = '';
+  for (var i = 1; i <= 5; i++) {
+    var filled = i <= current;
+    html += '<button class="star-btn' + (filled ? ' filled' : '') + (onClick ? '' : ' readonly') + '"' +
+      (onClick ? ' onclick="' + onClick + '(' + i + ')"' : '') +
+      '><span class="material-symbols-outlined" style="font-size:inherit; font-variation-settings:\'FILL\' ' + (filled ? '1' : '0') + ';">star</span></button>';
+  }
+  return html;
+}
+
+var myRatingCache = { value: 0, review: '' };
+
+function renderRatings(r) {
+  var summary = document.getElementById('ratings-summary');
+  var agg = ratingsAgg[r.id];
+  if (agg && agg.count) {
+    summary.innerHTML = '<span class="rating-summary"><span class="star-row">' + starRowHtml(Math.round(agg.avg), null) + '</span> ' +
+      agg.avg.toFixed(1) + ' · ' + agg.count + ' review' + (agg.count !== 1 ? 's' : '') + '</span>';
+  } else {
+    summary.innerHTML = '<span class="rating-summary">No ratings yet — be the first!</span>';
+  }
+
+  // My entry form (only if not owner)
+  var isOwner = (r._ownerId === currentUser.id);
+  var myEntry = document.getElementById('ratings-my-entry');
+  if (isOwner) {
+    myEntry.style.display = 'none';
+  } else {
+    myEntry.style.display = 'block';
+    // Fetch my rating
+    sb.from('recipe_ratings').select('*').eq('recipe_id', r.id).eq('user_id', currentUser.id).maybeSingle().then(function(res) {
+      var mine = res.data;
+      myRatingCache = { value: mine ? mine.rating : 0, review: mine ? (mine.review || '') : '' };
+      document.getElementById('my-star-row').innerHTML = starRowHtml(myRatingCache.value, 'setMyRating');
+      document.getElementById('my-review').value = myRatingCache.review;
+      document.getElementById('delete-rating-btn').style.display = mine ? 'inline-flex' : 'none';
+    });
+  }
+
+  // List of reviews
+  var listEl = document.getElementById('ratings-list');
+  listEl.innerHTML = '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:13px;">Loading reviews...</span>';
+  sb.from('recipe_ratings').select('*').eq('recipe_id', r.id).order('updated_at', { ascending: false }).then(function(res) {
+    if (res.error) { listEl.textContent = ''; return; }
+    var reviews = (res.data || []).filter(function(x) { return x.review && x.review.trim(); });
+    if (!reviews.length) { listEl.innerHTML = ''; return; }
+    fetchProfiles(reviews.map(function(x) { return x.user_id; })).then(function() {
+      listEl.innerHTML = reviews.map(function(x) {
+        return '<div class="review-item">' +
+          '<div class="star-row">' + starRowHtml(x.rating, null) + '</div>' +
+          '<div class="review-text">' + esc(x.review) + '</div>' +
+          '<div class="review-author">— ' + esc(profileLabel(x.user_id)) + '</div>' +
+          '</div>';
+      }).join('');
+    });
+  });
+}
+
+function setMyRating(n) {
+  myRatingCache.value = n;
+  document.getElementById('my-star-row').innerHTML = starRowHtml(n, 'setMyRating');
+}
+
+function submitRating() {
+  if (!myRatingCache.value) { alert('Choose 1 to 5 stars first.'); return; }
+  var review = (document.getElementById('my-review').value || '').trim();
+  var row = {
+    recipe_id: currentRecipeId,
+    user_id: currentUser.id,
+    rating: myRatingCache.value,
+    review: review || null,
+    updated_at: new Date().toISOString()
+  };
+  sb.from('recipe_ratings').upsert(row).then(function(res) {
+    if (res.error) { alert('Rating failed: ' + res.error.message); return; }
+    refreshRatingsAgg().then(function() {
+      var r = recipes.find(function(x) { return x.id === currentRecipeId; }) ||
+              (communityRecipes || []).find(function(x) { return x.id === currentRecipeId; });
+      if (r) renderRatings(r);
+    });
+  });
+}
+
+function deleteMyRating() {
+  if (!confirm('Remove thy review?')) return;
+  sb.from('recipe_ratings').delete().eq('recipe_id', currentRecipeId).eq('user_id', currentUser.id).then(function(res) {
+    if (res.error) { alert('Remove failed: ' + res.error.message); return; }
+    myRatingCache = { value: 0, review: '' };
+    document.getElementById('my-review').value = '';
+    refreshRatingsAgg().then(function() {
+      var r = recipes.find(function(x) { return x.id === currentRecipeId; }) ||
+              (communityRecipes || []).find(function(x) { return x.id === currentRecipeId; });
+      if (r) renderRatings(r);
+    });
+  });
+}
+
+// ─── Social: Community Tome ───────────────────────────────────
+var communityRecipes = [];
+
+function openCommunityTome() {
+  showModal('modal-community');
+  document.getElementById('communitySearch').value = '';
+  document.getElementById('community-list').innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">Gathering scrolls from the realm...</p>';
+  sb.from('recipes').select('*').eq('visibility', 'public').neq('user_id', currentUser.id).then(function(res) {
+    if (res.error) { document.getElementById('community-list').innerHTML = 'Error: ' + esc(res.error.message); return; }
+    communityRecipes = (res.data || []).map(rowToRecipe);
+    fetchProfiles(communityRecipes.map(function(r) { return r._ownerId; })).then(function() {
+      refreshRatingsAgg().then(renderCommunityList);
+    });
+  });
+}
+
+function renderCommunityList() {
+  var q = (document.getElementById('communitySearch').value || '').toLowerCase();
+  var list = communityRecipes.filter(function(r) {
+    if (!q) return true;
+    return (r.name || '').toLowerCase().includes(q) ||
+           (r.category || '').toLowerCase().includes(q) ||
+           (r.ingredients || []).some(function(i) { return (i || '').toLowerCase().includes(q); });
+  });
+  var el = document.getElementById('community-list');
+  if (!list.length) {
+    el.innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">' +
+      (communityRecipes.length ? 'No scrolls match thy query.' : 'The community tome is empty. Be the first to share!') + '</p>';
+    return;
+  }
+  el.innerHTML = list.map(function(r) {
+    var agg = ratingsAgg[r.id];
+    var ratingBit = agg && agg.count
+      ? '<span class="rating-summary"><span class="star-row">' + starRowHtml(Math.round(agg.avg), null) + '</span> ' + agg.avg.toFixed(1) + ' (' + agg.count + ')</span>'
+      : '';
+    var meta = [];
+    if (r.category) meta.push(esc(r.category));
+    if (r.prepTime) meta.push('Prep ' + esc(r.prepTime));
+    if (r.cookTime) meta.push('Cook ' + esc(r.cookTime));
+    meta.push('By ' + esc(profileLabel(r._ownerId)));
+    return '<div class="community-card" onclick="openCommunityRecipe(\'' + r.id + '\')">' +
+      '<div class="community-card-title">' + esc(r.name) + '</div>' +
+      '<div class="community-card-meta">' + meta.join(' · ') + (ratingBit ? ' · ' + ratingBit : '') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function openCommunityRecipe(id) {
+  var r = communityRecipes.find(function(x) { return x.id === id; });
+  if (!r) return;
+  r._external = true; // don't show in main list
+  if (!recipes.find(function(x) { return x.id === id; })) {
+    recipes.push(r);
+  }
+  hideModal('modal-community');
+  openRecipeDetail(id);
+}
+
+// ─── Deep link: ?recipe=<id> ──────────────────────────────────
+function handleDeepLink() {
+  var params = new URLSearchParams(location.search);
+  var rid = params.get('recipe');
+  if (!rid) return;
+  // Wait till recipes loaded
+  var tryOpen = function(attempts) {
+    var r = recipes.find(function(x) { return x.id === rid; });
+    if (r) { openRecipeDetail(rid); return; }
+    // Not in my list — try fetching as public
+    sb.from('recipes').select('*').eq('id', rid).maybeSingle().then(function(res) {
+      if (res.data) {
+        var fr = rowToRecipe(res.data);
+        if (fr._ownerId !== currentUser.id) fr._external = true;
+        recipes.push(fr);
+        fetchProfiles([fr._ownerId]).then(function() { openRecipeDetail(rid); });
+      } else if (attempts > 0) {
+        setTimeout(function() { tryOpen(attempts - 1); }, 500);
+      }
+    });
+  };
+  setTimeout(function() { tryOpen(3); }, 800);
+}
+
 // ─── Init ─────────────────────────────────────────────────────
 // Auth listener handles initial view. Default to login view while Supabase checks.
 document.getElementById('view-login').classList.add('active');
+
+// Deep-link support after auth
+var _origHandleSession = handleAuthSession;
+handleAuthSession = function(session) {
+  _origHandleSession(session);
+  if (session && session.user) setTimeout(handleDeepLink, 500);
+};
 </script>
 </body>
 </html>
