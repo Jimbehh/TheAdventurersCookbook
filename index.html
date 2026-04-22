@@ -1691,7 +1691,7 @@ function forkRecipe(id) {
   if (!r) return;
   if (!confirm('Copy "' + r.name + '" into thy personal tome?')) return;
   var copy = JSON.parse(JSON.stringify(r));
-  delete copy._ownerId; delete copy._visibility; delete copy._isCollab;
+  delete copy._ownerId; delete copy._visibility; delete copy._isCollab; delete copy._external;
   copy.id = genId();
   copy.name = r.name; // keep name
   var row = { id: copy.id, user_id: currentUser.id, data: copy, visibility: 'private', updated_at: new Date().toISOString() };
