@@ -795,6 +795,44 @@
   }
   .timer-actions button:hover { color: var(--accent); border-color: var(--accent); }
 
+  /* ═══ Favourites ═══ */
+  .fav-star {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink-faded); padding: 4px; line-height: 1;
+    transition: transform 0.15s, color 0.15s;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .fav-star:hover { transform: scale(1.2); color: #c9a035; }
+  .fav-star.filled { color: #c9a035; }
+  .fav-star .material-symbols-outlined { font-size: 22px; font-variation-settings: 'FILL' 0; }
+  .fav-star.filled .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+  .fav-star.inline .material-symbols-outlined { font-size: 18px; }
+
+  .fav-filter-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid var(--gold-dark);
+    background: var(--parchment-light); color: var(--ink-faded);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .fav-filter-chip:hover { color: #c9a035; }
+  .fav-filter-chip.active { background: #c9a035; color: var(--parchment-light); border-color: #c9a035; }
+  .fav-filter-chip .material-symbols-outlined { font-size: 14px; }
+  .fav-filter-chip.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+  /* ═══ Difficulty Badges ═══ */
+  .diff-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 3px 8px;
+    border: 1px solid;
+  }
+  .diff-tavern { color: var(--forest); border-color: var(--forest); background: rgba(45, 90, 39, 0.08); }
+  .diff-dungeon { color: #a06800; border-color: #a06800; background: rgba(160, 104, 0, 0.08); }
+  .diff-dragon { color: var(--accent); border-color: var(--accent); background: rgba(139, 26, 26, 0.08); }
+  .diff-badge-lg { font-size: 11px; padding: 5px 12px; }
+
   /* ═══ D20 Dice Roll ═══ */
   .dice-btn {
     display: inline-flex; align-items: center; justify-content: center;
@@ -953,12 +991,17 @@
         <hr class="ruled-line"/>
 
         <!-- Search + Dice Roll -->
-        <div style="margin-bottom:20px; display:flex; gap:8px; align-items:stretch;">
+        <div style="margin-bottom:10px; display:flex; gap:8px; align-items:stretch;">
           <div style="flex:1; display:flex; align-items:center; gap:8px; border:1px solid var(--gold-dark); padding:8px 12px;">
             <span class="material-symbols-outlined" style="color:var(--ink-faded); font-size:18px;">search</span>
             <input id="searchInput" class="tome-input" style="border:none; padding:0; background:transparent;" placeholder="Search the tome..." oninput="filterRecipes()" type="text"/>
           </div>
           <button class="dice-btn" onclick="rollTheDice()" title="Let the fates decide">20</button>
+        </div>
+        <div style="margin-bottom:20px; display:flex; gap:6px; flex-wrap:wrap;">
+          <button id="fav-filter-btn" class="fav-filter-chip" onclick="toggleFavFilter()">
+            <span class="material-symbols-outlined">star</span> Favourites
+          </button>
         </div>
 
         <!-- Export / Import -->
@@ -1020,7 +1063,12 @@
 
         <div style="text-align:center; margin-bottom:20px;">
           <div class="flourish">&#10040; &#10040; &#10040;</div>
-          <h1 id="detail-name" style="font-family:'Cinzel Decorative',cursive; font-size:24px; color:var(--accent); line-height:1.3; margin-bottom:8px;"></h1>
+          <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+            <h1 id="detail-name" style="font-family:'Cinzel Decorative',cursive; font-size:24px; color:var(--accent); line-height:1.3; margin:0;"></h1>
+            <button id="detail-fav-star" class="fav-star" onclick="toggleFavourite(currentRecipeId,event)" title="Favourite">
+              <span class="material-symbols-outlined">star</span>
+            </button>
+          </div>
           <div id="detail-tags" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px;"></div>
           <div class="flourish">&#10040; &#10040; &#10040;</div>
         </div>
@@ -1161,10 +1209,19 @@
           <input id="recipeCookTime" type="text" placeholder="30 min" class="tome-input"/>
         </div>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
         <div>
           <label class="field-label">Base Servings</label>
           <input id="recipeBaseServings" type="number" value="2" min="1" max="20" class="tome-input"/>
+        </div>
+        <div>
+          <label class="field-label">Difficulty</label>
+          <select id="recipeDifficulty" class="tome-select">
+            <option value="">Unspecified</option>
+            <option value="tavern">🗡 Tavern Fare (easy)</option>
+            <option value="dungeon">⚔ Dungeon Quest (medium)</option>
+            <option value="dragon">🐉 Dragon's Lair (hard)</option>
+          </select>
         </div>
         <div>
           <label class="field-label">Source Scroll URL</label>
@@ -1465,6 +1522,64 @@ function rowsToRecipes(rows) { return (rows || []).map(rowToRecipe); }
 var ratingsAgg = {};
 // Cache of profiles: { user_id: { email, display_name } }
 var profilesCache = {};
+// Favourites set of recipe_ids
+var favourites = new Set();
+var favFilter = false;
+
+function refreshFavourites() {
+  if (!currentUser) return Promise.resolve();
+  return sb.from('favourites').select('recipe_id').eq('user_id', currentUser.id).then(function(res) {
+    if (res.error) { console.error('favourites fetch', res.error); return; }
+    favourites = new Set((res.data || []).map(function(r) { return r.recipe_id; }));
+    if (currentView === 'list') renderRecipes();
+  });
+}
+
+function toggleFavourite(id, ev) {
+  if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+  if (!currentUser) return;
+  var isFav = favourites.has(id);
+  if (isFav) {
+    favourites.delete(id);
+    sb.from('favourites').delete().eq('user_id', currentUser.id).eq('recipe_id', id).then(function(res) {
+      if (res.error) { favourites.add(id); alert('Remove favourite failed: ' + res.error.message); }
+      if (currentView === 'list') renderRecipes();
+      updateDetailFavStar();
+    });
+  } else {
+    favourites.add(id);
+    sb.from('favourites').insert({ user_id: currentUser.id, recipe_id: id }).then(function(res) {
+      if (res.error) { favourites.delete(id); alert('Add favourite failed: ' + res.error.message); }
+      if (currentView === 'list') renderRecipes();
+      updateDetailFavStar();
+    });
+  }
+}
+
+function updateDetailFavStar() {
+  var el = document.getElementById('detail-fav-star');
+  if (!el || !currentRecipeId) return;
+  el.classList.toggle('filled', favourites.has(currentRecipeId));
+}
+
+function toggleFavFilter() {
+  favFilter = !favFilter;
+  document.getElementById('fav-filter-btn').classList.toggle('active', favFilter);
+  renderRecipes(document.getElementById('searchInput').value.toLowerCase());
+}
+
+// ─── Difficulty Helpers ───────────────────────────────────────
+var DIFFICULTY = {
+  tavern:  { label: '🗡 Tavern Fare',  short: 'Tavern',  cls: 'diff-tavern' },
+  dungeon: { label: '⚔ Dungeon Quest', short: 'Dungeon', cls: 'diff-dungeon' },
+  dragon:  { label: "🐉 Dragon's Lair", short: 'Dragon',  cls: 'diff-dragon' }
+};
+
+function diffBadge(d, large) {
+  if (!d || !DIFFICULTY[d]) return '';
+  var spec = DIFFICULTY[d];
+  return '<span class="diff-badge ' + spec.cls + (large ? ' diff-badge-lg' : '') + '">' + spec.label + '</span>';
+}
 
 function refreshRecipes() {
   if (!currentUser) return Promise.resolve();
@@ -1489,6 +1604,7 @@ function refreshRecipes() {
         updateSidebarCount();
         checkLocalMigration();
         refreshRatingsAgg();
+        refreshFavourites();
       });
     });
 }
@@ -1641,6 +1757,7 @@ function renderRecipes(query) {
   var subtitle = document.getElementById('header-subtitle');
   var filtered = recipes.filter(function(r) {
     if (r._external) return false;
+    if (favFilter && !favourites.has(r.id)) return false;
     return r.name.toLowerCase().includes(query) ||
       (r.category || '').toLowerCase().includes(query) ||
       r.ingredients.some(function(i) { return i.toLowerCase().includes(query); });
@@ -1651,10 +1768,21 @@ function renderRecipes(query) {
     : recipes.length + ' recipe' + (recipes.length !== 1 ? 's' : '') + ' recorded within these pages.';
 
   if (filtered.length === 0) {
+    var emptyTitle, emptyMsg, emptyIcon;
+    if (favFilter) {
+      emptyIcon = 'star'; emptyTitle = 'No favourites yet';
+      emptyMsg = 'Tap the ☆ on any recipe to bookmark it here.';
+    } else if (recipes.length === 0) {
+      emptyIcon = 'menu_book'; emptyTitle = 'The tome is empty';
+      emptyMsg = 'Inscribe a new recipe or import one from a scroll.';
+    } else {
+      emptyIcon = 'menu_book'; emptyTitle = 'No scrolls match thy query';
+      emptyMsg = 'Try a different search term.';
+    }
     grid.innerHTML = '<div style="text-align:center; padding:48px 0; color:var(--ink-faded);">' +
-      '<span class="material-symbols-outlined" style="font-size:48px; color:var(--gold-dark); opacity:0.4;">menu_book</span>' +
-      '<h3 style="font-family:\'Cinzel\',serif; font-size:18px; margin-top:12px;">' + (recipes.length === 0 ? 'The tome is empty' : 'No scrolls match thy query') + '</h3>' +
-      '<p style="font-family:\'IM Fell English\',serif; font-style:italic; font-size:14px; margin-top:4px;">' + (recipes.length === 0 ? 'Inscribe a new recipe or import one from a scroll.' : 'Try a different search term.') + '</p>' +
+      '<span class="material-symbols-outlined" style="font-size:48px; color:var(--gold-dark); opacity:0.4;">' + emptyIcon + '</span>' +
+      '<h3 style="font-family:\'Cinzel\',serif; font-size:18px; margin-top:12px;">' + emptyTitle + '</h3>' +
+      '<p style="font-family:\'IM Fell English\',serif; font-style:italic; font-size:14px; margin-top:4px;">' + emptyMsg + '</p>' +
       '</div>';
     return;
   }
@@ -1670,16 +1798,20 @@ function renderRecipes(query) {
     details.push(ingCount + ' ingredients');
 
     var badges = '';
+    if (r.difficulty) badges += diffBadge(r.difficulty);
     if (r._isCollab) badges += '<span class="badge badge-shared"><span class="material-symbols-outlined">group</span> Shared</span>';
     if (r._visibility === 'public' && r._ownerId === currentUser.id) badges += '<span class="badge badge-public"><span class="material-symbols-outlined">public</span> Public</span>';
     var agg = ratingsAgg[r.id];
     var ratingBit = agg && agg.count ? ' · ★ ' + agg.avg.toFixed(1) + ' (' + agg.count + ')' : '';
+    var isFav = favourites.has(r.id);
+    var star = '<button class="fav-star inline' + (isFav ? ' filled' : '') + '" onclick="toggleFavourite(\'' + r.id + '\',event)" title="' + (isFav ? 'Remove from favourites' : 'Mark as favourite') + '"><span class="material-symbols-outlined">star</span></button>';
     return '<div class="index-entry" onclick="openRecipeDetail(\'' + r.id + '\')">' +
       '<div style="display:flex; align-items:baseline;">' +
       '<span class="index-num">' + String(idx + 1).padStart(2, '0') + '.</span>' +
       '<span class="index-name">' + esc(r.name) + (badges ? '<span class="index-entry-badges">' + badges + '</span>' : '') + '</span>' +
       '<span class="index-dots"></span>' +
-      '<span class="index-page">' + ingCount + '</span>' +
+      star +
+      '<span class="index-page" style="margin-left:4px;">' + ingCount + '</span>' +
       '</div>' +
       '<div class="index-detail">' + esc(details.join(' · ')) + ratingBit + '</div>' +
       '</div>';
@@ -1698,9 +1830,13 @@ function openRecipeDetail(id) {
   // Tags
   var tags = '';
   if (r.category) tags += '<span style="font-family:\'Cinzel\',serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; border:1px solid var(--gold-dark); padding:4px 10px; color:var(--ink-faded);">' + esc(r.category) + '</span>';
+  if (r.difficulty) tags += diffBadge(r.difficulty, true);
   if (r.prepTime) tags += '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:14px;">Prep ' + esc(r.prepTime) + '</span>';
   if (r.cookTime) tags += '<span style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded); font-size:14px;">Cook ' + esc(r.cookTime) + '</span>';
   document.getElementById('detail-tags').innerHTML = tags;
+
+  // Favourite star state
+  updateDetailFavStar();
 
   // Servings
   var servings = servingOverrides[id];
@@ -2164,6 +2300,7 @@ function openAddModal() {
   document.getElementById('recipePrepTime').value = '';
   document.getElementById('recipeCookTime').value = '';
   document.getElementById('recipeBaseServings').value = '2';
+  document.getElementById('recipeDifficulty').value = '';
   document.getElementById('recipeUrl').value = '';
   document.getElementById('recipeIngredients').value = '';
   document.getElementById('recipeMethod').value = '';
@@ -2180,6 +2317,7 @@ function openEditModal(id) {
   document.getElementById('recipePrepTime').value = r.prepTime || '';
   document.getElementById('recipeCookTime').value = r.cookTime || '';
   document.getElementById('recipeBaseServings').value = r.baseServings || 2;
+  document.getElementById('recipeDifficulty').value = r.difficulty || '';
   document.getElementById('recipeUrl').value = r.url || '';
   document.getElementById('recipeIngredients').value = r.ingredients.join('\n');
   document.getElementById('recipeMethod').value = r.method.join('\n');
@@ -2202,6 +2340,7 @@ function saveRecipe() {
     prepTime: document.getElementById('recipePrepTime').value.trim(),
     cookTime: document.getElementById('recipeCookTime').value.trim(),
     baseServings: parseInt(document.getElementById('recipeBaseServings').value) || 2,
+    difficulty: document.getElementById('recipeDifficulty').value,
     url: document.getElementById('recipeUrl').value.trim(),
     ingredients: ingredients,
     method: method,
@@ -3008,8 +3147,12 @@ function renderCommunityList() {
     if (r.prepTime) meta.push('Prep ' + esc(r.prepTime));
     if (r.cookTime) meta.push('Cook ' + esc(r.cookTime));
     meta.push('By ' + esc(profileLabel(r._ownerId)));
+    var isFav = favourites.has(r.id);
+    var star = '<button class="fav-star inline' + (isFav ? ' filled' : '') + '" onclick="toggleFavourite(\'' + r.id + '\',event)" style="float:right;"><span class="material-symbols-outlined">star</span></button>';
+    var diff = r.difficulty ? ' ' + diffBadge(r.difficulty) : '';
     return '<div class="community-card" onclick="openCommunityRecipe(\'' + r.id + '\')">' +
-      '<div class="community-card-title">' + esc(r.name) + '</div>' +
+      star +
+      '<div class="community-card-title">' + esc(r.name) + diff + '</div>' +
       '<div class="community-card-meta">' + meta.join(' · ') + (ratingBit ? ' · ' + ratingBit : '') + '</div>' +
       '</div>';
   }).join('');
