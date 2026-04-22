@@ -745,6 +745,100 @@
   .index-entry-badges {
     margin-left: 8px; display: inline-flex; gap: 4px; vertical-align: middle;
   }
+
+  /* ═══ Timers ═══ */
+  .time-phrase {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 6px; margin: 0 2px;
+    background: rgba(160, 128, 48, 0.15);
+    border: 1px solid var(--gold-dark);
+    cursor: pointer; color: var(--leather-dark);
+    font-family: 'IM Fell English', serif;
+    transition: background 0.15s;
+    border-radius: 2px;
+  }
+  .time-phrase:hover { background: rgba(160, 128, 48, 0.35); }
+  .time-phrase .material-symbols-outlined { font-size: 13px; color: var(--forest); }
+
+  .timer-panel {
+    position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+    display: flex; flex-direction: column; gap: 8px;
+    max-width: 280px;
+  }
+  .timer-card {
+    background: var(--parchment-light);
+    border: 2px solid var(--leather);
+    padding: 10px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    font-family: 'IM Fell English', serif;
+  }
+  .timer-card.done { animation: timerFlash 0.7s infinite; border-color: var(--accent); }
+  @keyframes timerFlash {
+    0%, 100% { background: var(--parchment-light); }
+    50% { background: #ffccc0; }
+  }
+  .timer-label {
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--ink-faded); margin-bottom: 4px;
+  }
+  .timer-time {
+    font-family: 'Cinzel Decorative', cursive; font-size: 28px;
+    color: var(--accent); line-height: 1;
+  }
+  .timer-actions {
+    display: flex; gap: 6px; margin-top: 8px; justify-content: flex-end;
+  }
+  .timer-actions button {
+    background: none; border: 1px solid var(--gold-dark); cursor: pointer;
+    padding: 2px 8px; font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faded);
+  }
+  .timer-actions button:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ═══ D20 Dice Roll ═══ */
+  .dice-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px;
+    background: var(--leather); color: var(--parchment-light);
+    border: 1px solid var(--gold-dark); cursor: pointer;
+    font-family: 'Cinzel Decorative', cursive; font-weight: 700; font-size: 14px;
+    clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .dice-btn:hover { transform: rotate(15deg) scale(1.05); background: var(--accent); }
+
+  .dice-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(42, 24, 16, 0.85);
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .dice-overlay.open { display: flex; }
+  .dice-big {
+    width: 140px; height: 140px;
+    background: var(--parchment-light); color: var(--accent);
+    border: 3px solid var(--gold-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel Decorative', cursive; font-weight: 700; font-size: 56px;
+    clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    box-shadow: 0 0 40px rgba(201, 160, 53, 0.6);
+  }
+  .dice-big.rolling {
+    animation: diceRoll 0.12s linear infinite;
+  }
+  @keyframes diceRoll {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(1.1); }
+    50% { transform: rotate(180deg) scale(0.95); }
+    75% { transform: rotate(270deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  .dice-caption {
+    text-align: center; margin-top: 24px;
+    font-family: 'Cinzel Decorative', cursive; color: var(--parchment-light);
+    font-size: 18px; letter-spacing: 2px;
+  }
 </style>
 </head>
 <body>
@@ -858,12 +952,13 @@
 
         <hr class="ruled-line"/>
 
-        <!-- Search -->
-        <div style="margin-bottom:20px;">
-          <div style="display:flex; align-items:center; gap:8px; border:1px solid var(--gold-dark); padding:8px 12px;">
+        <!-- Search + Dice Roll -->
+        <div style="margin-bottom:20px; display:flex; gap:8px; align-items:stretch;">
+          <div style="flex:1; display:flex; align-items:center; gap:8px; border:1px solid var(--gold-dark); padding:8px 12px;">
             <span class="material-symbols-outlined" style="color:var(--ink-faded); font-size:18px;">search</span>
             <input id="searchInput" class="tome-input" style="border:none; padding:0; background:transparent;" placeholder="Search the tome..." oninput="filterRecipes()" type="text"/>
           </div>
+          <button class="dice-btn" onclick="rollTheDice()" title="Let the fates decide">20</button>
         </div>
 
         <!-- Export / Import -->
@@ -1195,6 +1290,17 @@
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ TIMER PANEL (floating) ═════════════════════════════════ -->
+<div id="timer-panel" class="timer-panel"></div>
+
+<!-- ══ DICE OVERLAY ═══════════════════════════════════════════ -->
+<div id="dice-overlay" class="dice-overlay">
+  <div>
+    <div id="dice-big" class="dice-big rolling">20</div>
+    <p id="dice-caption" class="dice-caption">The fates are deciding...</p>
   </div>
 </div>
 
@@ -1725,6 +1831,7 @@ function renderDetailMethod(r, servings) {
   var html = r.method.map(function(step, i) {
     var num = String(i + 1);
     var annotated = annotateMethodStep(esc(step), parsedIngredients, r.baseServings || 2, servings);
+    annotated = annotateTimes(annotated, 'Step ' + num);
     return '<div class="method-step">' +
       '<span class="step-num">' + num + '</span>' +
       '<p class="step-text">' + annotated + '</p>' +
@@ -1732,6 +1839,167 @@ function renderDetailMethod(r, servings) {
   }).join('');
   document.getElementById('detail-method').innerHTML = html || '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-faded);">No method listed.</p>';
 }
+
+// ─── Timer Detection & Countdown ──────────────────────────────
+// Match: "15 minutes", "2-3 hours", "1.5 hrs", "30 sec", "12–15 min" (en-dash too)
+var TIME_RE = /\b(\d+(?:\.\d+)?)(?:\s*(?:[-–—]|to)\s*(\d+(?:\.\d+)?))?\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/gi;
+
+function annotateTimes(html, labelPrefix) {
+  return html.replace(TIME_RE, function(match, a, b, unit) {
+    var high = parseFloat(b || a);
+    var unitNorm = unit.toLowerCase();
+    var secs = 0;
+    if (unitNorm.indexOf('hour') === 0 || unitNorm.indexOf('hr') === 0) secs = high * 3600;
+    else if (unitNorm.indexOf('min') === 0) secs = high * 60;
+    else secs = high;
+    secs = Math.round(secs);
+    if (secs < 5 || secs > 24 * 3600) return match; // skip absurd values
+    var label = encodeURIComponent(labelPrefix + ': ' + match.trim());
+    return '<span class="time-phrase" onclick="startTimer(' + secs + ',\'' + label + '\')" title="Start timer">' +
+      '<span class="material-symbols-outlined">play_arrow</span>' + match + '</span>';
+  });
+}
+
+var activeTimers = {};
+var timerTickInterval = null;
+var timerAudioCtx = null;
+
+function startTimer(seconds, encodedLabel) {
+  var label = decodeURIComponent(encodedLabel);
+  var id = 't' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  activeTimers[id] = {
+    id: id,
+    label: label,
+    endsAt: Date.now() + seconds * 1000,
+    total: seconds,
+    paused: false,
+    remaining: seconds * 1000,
+    done: false
+  };
+  ensureTimerLoop();
+  renderTimers();
+}
+
+function ensureTimerLoop() {
+  if (timerTickInterval) return;
+  timerTickInterval = setInterval(function() {
+    var anyActive = false;
+    Object.keys(activeTimers).forEach(function(id) {
+      var t = activeTimers[id];
+      if (t.done || t.paused) { anyActive = anyActive || !t.done; return; }
+      anyActive = true;
+      if (Date.now() >= t.endsAt) {
+        t.done = true;
+        t.remaining = 0;
+        playTimerDing();
+      }
+    });
+    renderTimers();
+    if (!anyActive) {
+      clearInterval(timerTickInterval);
+      timerTickInterval = null;
+    }
+  }, 250);
+}
+
+function pauseTimer(id) {
+  var t = activeTimers[id]; if (!t || t.done) return;
+  if (t.paused) {
+    t.endsAt = Date.now() + t.remaining;
+    t.paused = false;
+    ensureTimerLoop();
+  } else {
+    t.remaining = Math.max(0, t.endsAt - Date.now());
+    t.paused = true;
+  }
+  renderTimers();
+}
+
+function dismissTimer(id) {
+  delete activeTimers[id];
+  renderTimers();
+}
+
+function fmtTime(ms) {
+  var s = Math.max(0, Math.ceil(ms / 1000));
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var sec = s % 60;
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  return (h > 0 ? h + ':' + pad(m) : m) + ':' + pad(sec);
+}
+
+function renderTimers() {
+  var panel = document.getElementById('timer-panel');
+  var ids = Object.keys(activeTimers);
+  if (!ids.length) { panel.innerHTML = ''; return; }
+  panel.innerHTML = ids.map(function(id) {
+    var t = activeTimers[id];
+    var ms = t.paused ? t.remaining : (t.endsAt - Date.now());
+    return '<div class="timer-card' + (t.done ? ' done' : '') + '">' +
+      '<div class="timer-label">' + esc(t.label) + '</div>' +
+      '<div class="timer-time">' + (t.done ? 'Done!' : fmtTime(ms)) + '</div>' +
+      '<div class="timer-actions">' +
+        (t.done ? '' : '<button onclick="pauseTimer(\'' + id + '\')">' + (t.paused ? 'Resume' : 'Pause') + '</button>') +
+        '<button onclick="dismissTimer(\'' + id + '\')">' + (t.done ? 'Silence' : 'Cancel') + '</button>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function playTimerDing() {
+  try {
+    if (!timerAudioCtx) timerAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = timerAudioCtx;
+    [0, 0.25, 0.5].forEach(function(delay) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(880, ctx.currentTime + delay);
+      g.gain.setValueAtTime(0, ctx.currentTime + delay);
+      g.gain.linearRampToValueAtTime(0.3, ctx.currentTime + delay + 0.02);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + 0.2);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime + delay);
+      o.stop(ctx.currentTime + delay + 0.25);
+    });
+  } catch(e) {}
+  if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+}
+
+// ─── D20 Dice Roll ────────────────────────────────────────────
+function rollTheDice() {
+  var pool = recipes.filter(function(r) { return !r._external; });
+  if (!pool.length) { alert('The tome is empty. Inscribe some recipes first!'); return; }
+  var overlay = document.getElementById('dice-overlay');
+  var big = document.getElementById('dice-big');
+  var caption = document.getElementById('dice-caption');
+  overlay.classList.add('open');
+  big.classList.add('rolling');
+  caption.textContent = 'The fates are deciding...';
+  // Flicker random numbers during roll
+  var flickers = 0;
+  var flickerInt = setInterval(function() {
+    big.textContent = String(Math.floor(Math.random() * 20) + 1);
+    flickers++;
+  }, 90);
+  setTimeout(function() {
+    clearInterval(flickerInt);
+    big.classList.remove('rolling');
+    big.textContent = '20';
+    var chosen = pool[Math.floor(Math.random() * pool.length)];
+    caption.textContent = 'Thy fate: ' + chosen.name;
+    setTimeout(function() {
+      overlay.classList.remove('open');
+      openRecipeDetail(chosen.id);
+    }, 1100);
+  }, 1100);
+}
+
+// Allow clicking overlay to dismiss mid-roll
+document.getElementById('dice-overlay').addEventListener('click', function(e) {
+  if (e.target.id === 'dice-overlay') e.currentTarget.classList.remove('open');
+});
 
 function onDetailServingsChange(val) {
   var r = recipes.find(function(x) { return x.id === currentRecipeId; });
