@@ -833,6 +833,17 @@
   .diff-dragon { color: var(--accent); border-color: var(--accent); background: rgba(139, 26, 26, 0.08); }
   .diff-badge-lg { font-size: 11px; padding: 5px 12px; }
 
+  .diff-filter-chip {
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 4px 10px;
+    border: 1px solid var(--gold-dark); background: var(--parchment-light);
+    color: var(--ink-faded); cursor: pointer; transition: all 0.15s;
+  }
+  .diff-filter-chip:hover { color: var(--accent); }
+  .diff-filter-chip.active[data-diff="tavern"]  { background: var(--forest); color: var(--parchment-light); border-color: var(--forest); }
+  .diff-filter-chip.active[data-diff="dungeon"] { background: #a06800; color: var(--parchment-light); border-color: #a06800; }
+  .diff-filter-chip.active[data-diff="dragon"]  { background: var(--accent); color: var(--parchment-light); border-color: var(--accent); }
+
   /* ═══ Chapters ═══ */
   .chapter-section {
     margin-bottom: 16px;
@@ -1143,9 +1154,16 @@
         <span class="corner-ornament corner-bl">&#10045;</span>
         <span class="corner-ornament corner-br">&#10045;</span>
 
-        <div style="text-align:center; margin-bottom:24px;">
+        <div style="text-align:center; margin-bottom:16px;">
           <p class="section-header">Table of Recipes</p>
           <div class="flourish">&#8212; &#10043; &#8212;</div>
+        </div>
+
+        <!-- Difficulty filters -->
+        <div id="difficulty-filter-row" style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;">
+          <button class="diff-filter-chip" data-diff="tavern" onclick="toggleDifficultyFilter('tavern')">🗡 Tavern</button>
+          <button class="diff-filter-chip" data-diff="dungeon" onclick="toggleDifficultyFilter('dungeon')">⚔ Dungeon</button>
+          <button class="diff-filter-chip" data-diff="dragon" onclick="toggleDifficultyFilter('dragon')">🐉 Dragon's Lair</button>
         </div>
 
         <div id="recipeGrid"></div>
@@ -1665,6 +1683,7 @@ var favFilter = false;
 var chapters = []; // [{id, name}]
 var chapterAssignments = {}; // { recipe_id: chapter_id }
 var currentChapterFilter = null; // null=all, 'unsorted', or chapter_id
+var currentDifficultyFilter = null; // null, 'tavern', 'dungeon', 'dragon'
 // Ratings-given count (for achievement)
 var myRatingsGiven = 0;
 
@@ -1709,6 +1728,14 @@ function updateDetailFavStar() {
 function toggleFavFilter() {
   favFilter = !favFilter;
   document.getElementById('fav-filter-btn').classList.toggle('active', favFilter);
+  renderRecipes(document.getElementById('searchInput').value.toLowerCase());
+}
+
+function toggleDifficultyFilter(diff) {
+  currentDifficultyFilter = (currentDifficultyFilter === diff) ? null : diff;
+  document.querySelectorAll('.diff-filter-chip').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.diff === currentDifficultyFilter);
+  });
   renderRecipes(document.getElementById('searchInput').value.toLowerCase());
 }
 
@@ -1907,6 +1934,7 @@ function renderRecipes(query) {
     if (favFilter && !favourites.has(r.id)) return false;
     if (currentChapterFilter === 'unsorted' && chapterAssignments[r.id]) return false;
     if (currentChapterFilter && currentChapterFilter !== 'unsorted' && chapterAssignments[r.id] !== currentChapterFilter) return false;
+    if (currentDifficultyFilter && r.difficulty !== currentDifficultyFilter) return false;
     return r.name.toLowerCase().includes(query) ||
       (r.category || '').toLowerCase().includes(query) ||
       r.ingredients.some(function(i) { return i.toLowerCase().includes(query); });
