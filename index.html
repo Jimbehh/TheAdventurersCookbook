@@ -833,6 +833,102 @@
   .diff-dragon { color: var(--accent); border-color: var(--accent); background: rgba(139, 26, 26, 0.08); }
   .diff-badge-lg { font-size: 11px; padding: 5px 12px; }
 
+  /* ═══ Chapters ═══ */
+  .chapter-section {
+    margin-bottom: 16px;
+  }
+  .chapter-section-title {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--ink-faded);
+    margin-bottom: 8px;
+  }
+  .chapter-section-title button {
+    background: none; border: none; cursor: pointer; color: var(--ink-faded);
+    padding: 2px; line-height: 1;
+  }
+  .chapter-section-title button:hover { color: var(--accent); }
+  .chapter-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; cursor: pointer;
+    font-family: 'IM Fell English', serif; font-size: 14px;
+    color: var(--ink); border-left: 2px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .chapter-item:hover { background: rgba(160, 128, 48, 0.1); }
+  .chapter-item.active { border-left-color: var(--accent); background: rgba(139, 26, 26, 0.08); color: var(--accent); }
+  .chapter-item .chapter-count {
+    margin-left: auto; font-size: 11px; color: var(--ink-faded);
+    font-family: 'Cinzel', serif;
+  }
+  .chapter-item .material-symbols-outlined { font-size: 16px; color: var(--gold-dark); }
+  .chapter-item-delete {
+    opacity: 0; background: none; border: none; cursor: pointer; padding: 2px;
+    color: var(--accent); line-height: 1; transition: opacity 0.15s;
+  }
+  .chapter-item:hover .chapter-item-delete { opacity: 1; }
+  .chapter-item-delete .material-symbols-outlined { font-size: 14px; }
+
+  /* ═══ Achievements / Quest Log ═══ */
+  .quest-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .quest-card {
+    padding: 14px; border: 1px solid var(--gold-dark);
+    background: var(--parchment-light);
+    text-align: center; transition: transform 0.15s;
+  }
+  .quest-card.earned {
+    background: linear-gradient(135deg, var(--parchment-light) 0%, #f9e8b8 100%);
+    border-color: #c9a035;
+    box-shadow: 0 2px 6px rgba(201, 160, 53, 0.25);
+  }
+  .quest-card.locked { opacity: 0.45; filter: grayscale(0.8); }
+  .quest-icon {
+    font-size: 36px !important; color: var(--accent);
+    display: block; margin: 0 auto 8px;
+  }
+  .quest-card.locked .quest-icon { color: var(--ink-faded); }
+  .quest-title {
+    font-family: 'Cinzel Decorative', cursive; font-size: 14px;
+    color: var(--accent); margin-bottom: 4px;
+  }
+  .quest-card.locked .quest-title { color: var(--ink-faded); }
+  .quest-desc {
+    font-family: 'IM Fell English', serif; font-style: italic;
+    font-size: 12px; color: var(--ink-faded); line-height: 1.3;
+  }
+
+  .achievement-toast {
+    position: fixed; bottom: 20px; left: 20px; z-index: 2500;
+    background: var(--parchment-light);
+    border: 2px solid #c9a035; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    max-width: 320px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: toastSlide 0.4s ease-out, toastFade 0.4s ease-in 3.6s forwards;
+    font-family: 'IM Fell English', serif;
+  }
+  @keyframes toastSlide {
+    from { transform: translateX(-120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes toastFade {
+    to { transform: translateX(-120%); opacity: 0; }
+  }
+  .achievement-toast .toast-icon {
+    font-size: 32px !important; color: #c9a035;
+  }
+  .achievement-toast .toast-title {
+    font-family: 'Cinzel Decorative', cursive; font-size: 12px;
+    letter-spacing: 1px; color: var(--ink-faded); text-transform: uppercase;
+  }
+  .achievement-toast .toast-name {
+    font-family: 'Cinzel Decorative', cursive; font-size: 16px;
+    color: var(--accent);
+  }
+
   /* ═══ D20 Dice Roll ═══ */
   .dice-btn {
     display: inline-flex; align-items: center; justify-content: center;
@@ -1002,6 +1098,18 @@
           <button id="fav-filter-btn" class="fav-filter-chip" onclick="toggleFavFilter()">
             <span class="material-symbols-outlined">star</span> Favourites
           </button>
+          <button class="fav-filter-chip" onclick="openQuestLog()">
+            <span class="material-symbols-outlined">military_tech</span> Quest Log
+          </button>
+        </div>
+
+        <!-- Chapters -->
+        <div class="chapter-section">
+          <div class="chapter-section-title">
+            <span>Chapters</span>
+            <button onclick="createChapterPrompt()" title="New chapter"><span class="material-symbols-outlined" style="font-size:16px;">add</span></button>
+          </div>
+          <div id="chapter-list"></div>
         </div>
 
         <!-- Export / Import -->
@@ -1209,7 +1317,17 @@
           <input id="recipeCookTime" type="text" placeholder="30 min" class="tome-input"/>
         </div>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="field-label">Chapter</label>
+          <select id="recipeChapter" class="tome-select"><option value="">— None —</option></select>
+        </div>
+        <div>
+          <label class="field-label">Source Scroll URL</label>
+          <input id="recipeUrl" type="text" placeholder="https://..." class="tome-input"/>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div>
           <label class="field-label">Base Servings</label>
           <input id="recipeBaseServings" type="number" value="2" min="1" max="20" class="tome-input"/>
@@ -1222,10 +1340,6 @@
             <option value="dungeon">⚔ Dungeon Quest (medium)</option>
             <option value="dragon">🐉 Dragon's Lair (hard)</option>
           </select>
-        </div>
-        <div>
-          <label class="field-label">Source Scroll URL</label>
-          <input id="recipeUrl" type="text" placeholder="https://..." class="tome-input"/>
         </div>
       </div>
       <div>
@@ -1358,6 +1472,27 @@
   <div>
     <div id="dice-big" class="dice-big rolling">20</div>
     <p id="dice-caption" class="dice-caption">The fates are deciding...</p>
+  </div>
+</div>
+
+<!-- ══ MODAL: QUEST LOG ═══════════════════════════════════════ -->
+<div id="modal-quest" class="modal-overlay">
+  <div class="modal-scroll" style="max-width:760px; display:flex; flex-direction:column; max-height:90vh;">
+    <div style="flex-shrink:0;">
+      <div style="display:flex; justify-content:flex-end;">
+        <button onclick="hideModal('modal-quest')" style="background:none; border:none; cursor:pointer; color:var(--ink-faded);">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div style="text-align:center; margin-bottom:16px;">
+        <h2 style="font-family:'Cinzel Decorative',cursive; font-size:22px; color:var(--accent);">Quest Log</h2>
+        <div class="flourish">&#8212; &#10043; &#8212;</div>
+        <p id="quest-progress" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px; margin-top:4px;"></p>
+      </div>
+    </div>
+    <div id="quest-grid-container" style="flex:1; overflow-y:auto;">
+      <div id="quest-grid" class="quest-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -1525,6 +1660,12 @@ var profilesCache = {};
 // Favourites set of recipe_ids
 var favourites = new Set();
 var favFilter = false;
+// Chapters
+var chapters = []; // [{id, name}]
+var chapterAssignments = {}; // { recipe_id: chapter_id }
+var currentChapterFilter = null; // null=all, 'unsorted', or chapter_id
+// Ratings-given count (for achievement)
+var myRatingsGiven = 0;
 
 function refreshFavourites() {
   if (!currentUser) return Promise.resolve();
@@ -1532,6 +1673,7 @@ function refreshFavourites() {
     if (res.error) { console.error('favourites fetch', res.error); return; }
     favourites = new Set((res.data || []).map(function(r) { return r.recipe_id; }));
     if (currentView === 'list') renderRecipes();
+    checkAchievements();
   });
 }
 
@@ -1552,6 +1694,7 @@ function toggleFavourite(id, ev) {
       if (res.error) { favourites.delete(id); alert('Add favourite failed: ' + res.error.message); }
       if (currentView === 'list') renderRecipes();
       updateDetailFavStar();
+      checkAchievements();
     });
   }
 }
@@ -1605,6 +1748,9 @@ function refreshRecipes() {
         checkLocalMigration();
         refreshRatingsAgg();
         refreshFavourites();
+        refreshChapters();
+        refreshRatingsGivenCount();
+        renderChapterSidebar();
       });
     });
 }
@@ -1758,6 +1904,8 @@ function renderRecipes(query) {
   var filtered = recipes.filter(function(r) {
     if (r._external) return false;
     if (favFilter && !favourites.has(r.id)) return false;
+    if (currentChapterFilter === 'unsorted' && chapterAssignments[r.id]) return false;
+    if (currentChapterFilter && currentChapterFilter !== 'unsorted' && chapterAssignments[r.id] !== currentChapterFilter) return false;
     return r.name.toLowerCase().includes(query) ||
       (r.category || '').toLowerCase().includes(query) ||
       r.ingredients.some(function(i) { return i.toLowerCase().includes(query); });
@@ -1857,6 +2005,7 @@ function openRecipeDetail(id) {
   renderDetailIngredients(r, servings);
   renderDetailMethod(r, servings);
   renderSocialSections(r);
+  if (r.difficulty === 'dragon') bumpCounter('dragonOpened');
   showView('detail');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1942,6 +2091,7 @@ function forkRecipe(id) {
     copy._ownerId = currentUser.id;
     copy._visibility = 'private';
     recipes.push(copy);
+    bumpCounter('forked');
     alert('Copied to thy tome!');
     openRecipeDetail(copy.id);
   });
@@ -2001,6 +2151,7 @@ var timerTickInterval = null;
 var timerAudioCtx = null;
 
 function startTimer(seconds, encodedLabel) {
+  bumpCounter('timerStarted');
   var label = decodeURIComponent(encodedLabel);
   var id = 't' + Date.now() + '-' + Math.floor(Math.random() * 1000);
   activeTimers[id] = {
@@ -2107,6 +2258,7 @@ function playTimerDing() {
 function rollTheDice() {
   var pool = recipes.filter(function(r) { return !r._external; });
   if (!pool.length) { alert('The tome is empty. Inscribe some recipes first!'); return; }
+  bumpCounter('diceRolled');
   var overlay = document.getElementById('dice-overlay');
   var big = document.getElementById('dice-big');
   var caption = document.getElementById('dice-caption');
@@ -2136,6 +2288,210 @@ function rollTheDice() {
 document.getElementById('dice-overlay').addEventListener('click', function(e) {
   if (e.target.id === 'dice-overlay') e.currentTarget.classList.remove('open');
 });
+
+// ─── Chapters ─────────────────────────────────────────────────
+function refreshChapters() {
+  if (!currentUser) return Promise.resolve();
+  return Promise.all([
+    sb.from('chapters').select('*').eq('user_id', currentUser.id).order('sort_order').order('created_at'),
+    sb.from('recipe_chapter_assignments').select('*').eq('user_id', currentUser.id)
+  ]).then(function(results) {
+    chapters = (results[0].data || []).map(function(c) { return { id: c.id, name: c.name }; });
+    chapterAssignments = {};
+    (results[1].data || []).forEach(function(a) { chapterAssignments[a.recipe_id] = a.chapter_id; });
+    renderChapterSidebar();
+    populateChapterDropdown();
+    if (currentView === 'list') renderRecipes();
+  });
+}
+
+function renderChapterSidebar() {
+  var el = document.getElementById('chapter-list');
+  if (!el) return;
+  var counts = {};
+  var unsortedCount = 0;
+  recipes.forEach(function(r) {
+    if (r._external) return;
+    var cid = chapterAssignments[r.id];
+    if (cid) counts[cid] = (counts[cid] || 0) + 1;
+    else unsortedCount++;
+  });
+  var totalCount = recipes.filter(function(r) { return !r._external; }).length;
+
+  var html = '';
+  html += '<div class="chapter-item' + (currentChapterFilter === null ? ' active' : '') + '" onclick="filterByChapter(null)">' +
+    '<span class="material-symbols-outlined">menu_book</span> All Recipes' +
+    '<span class="chapter-count">' + totalCount + '</span></div>';
+  chapters.forEach(function(c) {
+    html += '<div class="chapter-item' + (currentChapterFilter === c.id ? ' active' : '') + '" onclick="filterByChapter(\'' + c.id + '\')">' +
+      '<span class="material-symbols-outlined">book</span> ' + esc(c.name) +
+      '<span class="chapter-count">' + (counts[c.id] || 0) + '</span>' +
+      '<button class="chapter-item-delete" onclick="deleteChapter(\'' + c.id + '\',event)" title="Delete chapter">' +
+        '<span class="material-symbols-outlined">close</span></button>' +
+      '</div>';
+  });
+  if (chapters.length) {
+    html += '<div class="chapter-item' + (currentChapterFilter === 'unsorted' ? ' active' : '') + '" onclick="filterByChapter(\'unsorted\')">' +
+      '<span class="material-symbols-outlined">inbox</span> Unsorted' +
+      '<span class="chapter-count">' + unsortedCount + '</span></div>';
+  }
+  el.innerHTML = html;
+}
+
+function populateChapterDropdown() {
+  var sel = document.getElementById('recipeChapter');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">— None —</option>' +
+    chapters.map(function(c) { return '<option value="' + c.id + '">' + esc(c.name) + '</option>'; }).join('');
+  sel.value = cur;
+}
+
+function filterByChapter(cid) {
+  currentChapterFilter = cid;
+  renderChapterSidebar();
+  renderRecipes(document.getElementById('searchInput').value.toLowerCase());
+}
+
+function createChapterPrompt() {
+  var name = prompt('Name of the new chapter:');
+  if (!name || !name.trim()) return;
+  sb.from('chapters').insert({ user_id: currentUser.id, name: name.trim() }).select().single().then(function(res) {
+    if (res.error) { alert('Failed: ' + res.error.message); return; }
+    chapters.push({ id: res.data.id, name: res.data.name });
+    renderChapterSidebar();
+    populateChapterDropdown();
+  });
+}
+
+function deleteChapter(id, ev) {
+  if (ev) ev.stopPropagation();
+  var ch = chapters.find(function(c) { return c.id === id; });
+  if (!ch) return;
+  if (!confirm('Delete chapter "' + ch.name + '"? Recipes will become unsorted.')) return;
+  sb.from('chapters').delete().eq('id', id).then(function(res) {
+    if (res.error) { alert('Failed: ' + res.error.message); return; }
+    chapters = chapters.filter(function(c) { return c.id !== id; });
+    // Local assignment cleanup (DB cascades)
+    Object.keys(chapterAssignments).forEach(function(rid) {
+      if (chapterAssignments[rid] === id) delete chapterAssignments[rid];
+    });
+    if (currentChapterFilter === id) currentChapterFilter = null;
+    renderChapterSidebar();
+    populateChapterDropdown();
+    if (currentView === 'list') renderRecipes();
+  });
+}
+
+function assignRecipeToChapter(recipeId, chapterId) {
+  if (!currentUser) return Promise.resolve();
+  if (!chapterId) {
+    delete chapterAssignments[recipeId];
+    return sb.from('recipe_chapter_assignments').delete()
+      .eq('user_id', currentUser.id).eq('recipe_id', recipeId);
+  }
+  chapterAssignments[recipeId] = chapterId;
+  return sb.from('recipe_chapter_assignments').upsert({
+    user_id: currentUser.id, recipe_id: recipeId, chapter_id: chapterId,
+    updated_at: new Date().toISOString()
+  });
+}
+
+// ─── Achievements ─────────────────────────────────────────────
+var ACHIEVEMENTS = [
+  { id: 'first_inscription', icon: 'menu_book', title: 'First Inscription', desc: 'Inscribed thy first recipe.', check: function(ctx) { return ctx.myRecipeCount >= 1; } },
+  { id: 'scribe_ten', icon: 'auto_stories', title: 'Scribe of Ten', desc: 'Ten recipes fill thy tome.', check: function(ctx) { return ctx.myRecipeCount >= 10; } },
+  { id: 'scribe_fifty', icon: 'library_books', title: 'Master Scribe', desc: 'Fifty recipes — a true cookbook.', check: function(ctx) { return ctx.myRecipeCount >= 50; } },
+  { id: 'first_favourite', icon: 'star', title: 'Bookmarker', desc: 'First favourite saved.', check: function(ctx) { return ctx.favCount >= 1; } },
+  { id: 'hoarder', icon: 'bookmark', title: 'Hoarder', desc: 'Ten recipes favourited.', check: function(ctx) { return ctx.favCount >= 10; } },
+  { id: 'town_crier', icon: 'public', title: 'Town Crier', desc: 'Shared a scroll with the realm.', check: function(ctx) { return ctx.publicCount >= 1; } },
+  { id: 'fellowship', icon: 'group', title: 'Fellowship', desc: 'Joined or owned a collaboration.', check: function(ctx) { return ctx.collabCount >= 1; } },
+  { id: 'critic', icon: 'reviews', title: 'Critic', desc: 'Rated five recipes.', check: function(ctx) { return ctx.ratingsGivenCount >= 5; } },
+  { id: 'decisive', icon: 'casino', title: 'Decisive', desc: 'Rolled the D20 of fate.', check: function() { return localCount('diceRolled') >= 1; } },
+  { id: 'timekeeper', icon: 'timer', title: 'Timekeeper', desc: 'Started a cooking timer.', check: function() { return localCount('timerStarted') >= 1; } },
+  { id: 'dragon_slayer', icon: 'local_fire_department', title: 'Dragon Slayer', desc: "Opened a Dragon's Lair recipe.", check: function() { return localCount('dragonOpened') >= 1; } },
+  { id: 'collector', icon: 'content_copy', title: 'Collector', desc: 'Copied a community recipe.', check: function() { return localCount('forked') >= 1; } },
+];
+
+function localCount(key) { return parseInt(localStorage.getItem('ach_counter_' + key) || '0', 10); }
+function bumpCounter(key) {
+  localStorage.setItem('ach_counter_' + key, String(localCount(key) + 1));
+  checkAchievements();
+}
+
+function earnedAchievements() {
+  try { return new Set(JSON.parse(localStorage.getItem('achievements_earned') || '[]')); } catch(e) { return new Set(); }
+}
+function saveEarned(set) {
+  localStorage.setItem('achievements_earned', JSON.stringify(Array.from(set)));
+}
+
+function achievementCtx() {
+  var mine = recipes.filter(function(r) { return r._ownerId === currentUser.id && !r._external; });
+  return {
+    myRecipeCount: mine.length,
+    favCount: favourites.size,
+    publicCount: mine.filter(function(r) { return r._visibility === 'public'; }).length,
+    collabCount: recipes.filter(function(r) { return r._isCollab || (r._ownerId === currentUser.id && r._hasCollabs); }).length,
+    ratingsGivenCount: myRatingsGiven
+  };
+}
+
+function checkAchievements() {
+  if (!currentUser) return;
+  var earned = earnedAchievements();
+  var ctx = achievementCtx();
+  var newlyEarned = [];
+  ACHIEVEMENTS.forEach(function(a) {
+    if (!earned.has(a.id) && a.check(ctx)) {
+      earned.add(a.id);
+      newlyEarned.push(a);
+    }
+  });
+  if (newlyEarned.length) {
+    saveEarned(earned);
+    newlyEarned.forEach(function(a, i) {
+      setTimeout(function() { showAchievementToast(a); }, i * 4500);
+    });
+  }
+}
+
+function showAchievementToast(a) {
+  var existing = document.querySelector('.achievement-toast');
+  if (existing) existing.remove();
+  var el = document.createElement('div');
+  el.className = 'achievement-toast';
+  el.innerHTML = '<span class="material-symbols-outlined toast-icon">' + a.icon + '</span>' +
+    '<div><div class="toast-title">Achievement earned</div><div class="toast-name">' + esc(a.title) + '</div></div>';
+  document.body.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.remove(); }, 4500);
+}
+
+function openQuestLog() {
+  checkAchievements();
+  var earned = earnedAchievements();
+  var total = ACHIEVEMENTS.length;
+  document.getElementById('quest-progress').textContent = earned.size + ' of ' + total + ' quests completed';
+  var grid = document.getElementById('quest-grid');
+  grid.innerHTML = ACHIEVEMENTS.map(function(a) {
+    var got = earned.has(a.id);
+    return '<div class="quest-card ' + (got ? 'earned' : 'locked') + '">' +
+      '<span class="material-symbols-outlined quest-icon">' + (got ? a.icon : 'lock') + '</span>' +
+      '<div class="quest-title">' + esc(a.title) + '</div>' +
+      '<div class="quest-desc">' + esc(a.desc) + '</div>' +
+      '</div>';
+  }).join('');
+  showModal('modal-quest');
+}
+
+function refreshRatingsGivenCount() {
+  if (!currentUser) return Promise.resolve();
+  return sb.from('recipe_ratings').select('recipe_id', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id).then(function(res) {
+      myRatingsGiven = res.count || 0;
+      checkAchievements();
+    });
+}
 
 function onDetailServingsChange(val) {
   var r = recipes.find(function(x) { return x.id === currentRecipeId; });
@@ -2304,6 +2660,8 @@ function openAddModal() {
   document.getElementById('recipeUrl').value = '';
   document.getElementById('recipeIngredients').value = '';
   document.getElementById('recipeMethod').value = '';
+  populateChapterDropdown();
+  document.getElementById('recipeChapter').value = '';
   showModal('modal-recipe');
 }
 
@@ -2321,6 +2679,8 @@ function openEditModal(id) {
   document.getElementById('recipeUrl').value = r.url || '';
   document.getElementById('recipeIngredients').value = r.ingredients.join('\n');
   document.getElementById('recipeMethod').value = r.method.join('\n');
+  populateChapterDropdown();
+  document.getElementById('recipeChapter').value = chapterAssignments[id] || '';
   showModal('modal-recipe');
 }
 
@@ -2354,14 +2714,18 @@ function saveRecipe() {
     if (existing) data = Object.assign({}, existing, data);
   }
 
+  var chapterChoice = document.getElementById('recipeChapter').value || '';
   saveRecipeToCloud(data).then(function() {
+    return assignRecipeToChapter(id, chapterChoice);
+  }).then(function() {
     closeRecipeModal();
+    if (currentView === 'list') { renderChapterSidebar(); renderRecipes(); }
     if (editId && editId === currentRecipeId && currentView === 'detail') {
-      // small delay to let snapshot update recipes array
       setTimeout(function() { openRecipeDetail(editId); }, 100);
     }
+    checkAchievements();
   }).catch(function(e) {
-    alert('Save failed: ' + e.message);
+    alert('Save failed: ' + (e.message || e));
   });
 }
 
@@ -2916,7 +3280,7 @@ function hideModal(id) {
 }
 
 // Close modals on backdrop click
-['modal-recipe','modal-import','modal-shopping','modal-community'].forEach(function(id) {
+['modal-recipe','modal-import','modal-shopping','modal-community','modal-quest'].forEach(function(id) {
   var el = document.getElementById(id);
   if (el) el.addEventListener('click', function(e) { if (e.target === el) hideModal(id); });
 });
@@ -2933,6 +3297,7 @@ function toggleVisibility(makePublic) {
       return;
     }
     r._visibility = newVis;
+    if (makePublic) checkAchievements();
     document.getElementById('visibility-label').textContent = makePublic ? 'Public (anyone can find it)' : 'Make public';
     document.getElementById('copy-link-btn').style.display = makePublic ? 'inline-flex' : 'none';
     document.getElementById('share-status').textContent = makePublic ? 'This scroll is now visible in the Community Tome.' : 'This scroll is now private.';
@@ -3085,6 +3450,7 @@ function submitRating() {
   };
   sb.from('recipe_ratings').upsert(row).then(function(res) {
     if (res.error) { alert('Rating failed: ' + res.error.message); return; }
+    refreshRatingsGivenCount();
     refreshRatingsAgg().then(function() {
       var r = recipes.find(function(x) { return x.id === currentRecipeId; }) ||
               (communityRecipes || []).find(function(x) { return x.id === currentRecipeId; });
