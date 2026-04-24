@@ -984,9 +984,173 @@
     font-family: 'Cinzel Decorative', cursive; color: var(--parchment-light);
     font-size: 18px; letter-spacing: 2px;
   }
+
+  /* ═══ SEASONAL TINTS ═══ */
+  body.season-spring {
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(74,128,66,0.28) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.22) 0%, transparent 60%);
+  }
+  body.season-spring .page { filter: hue-rotate(-4deg) saturate(1.02); }
+  body.season-summer {
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(224,200,120,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(139,26,26,0.18) 0%, transparent 60%);
+  }
+  body.season-summer .page { filter: saturate(1.08) brightness(1.02); }
+  body.season-autumn {
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(160,80,30,0.32) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(139,26,26,0.25) 0%, transparent 60%);
+  }
+  body.season-autumn .page { filter: hue-rotate(6deg) saturate(1.05); }
+  body.season-winter {
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(120,140,170,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(92,61,46,0.25) 0%, transparent 60%);
+  }
+  body.season-winter .page { filter: hue-rotate(-10deg) saturate(0.9) brightness(0.98); }
+
+  /* ═══ CANDLELIGHT MODE ═══ */
+  body.candlelight {
+    background: #120a05;
+    background-image:
+      radial-gradient(ellipse at 20% 40%, rgba(201,120,40,0.22) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 60%, rgba(139,60,20,0.18) 0%, transparent 55%);
+  }
+  body.candlelight .page {
+    background: #2a1d10 !important;
+    color: #e9d3a6;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.6), 0 0 40px rgba(201,120,40,0.12);
+  }
+  body.candlelight .page-border { border-color: rgba(201,168,76,0.35) !important; }
+  body.candlelight h1, body.candlelight h2, body.candlelight h3, body.candlelight h4 { color: #f0d6a0; }
+  body.candlelight .section-header { color: #e9d3a6; }
+  body.candlelight input, body.candlelight textarea, body.candlelight select {
+    background: #3a2a1a !important; color: #e9d3a6 !important;
+    border-color: rgba(201,168,76,0.3) !important;
+  }
+  body.candlelight .btn-subtle { color: #e9d3a6; }
+  body.candlelight .corner-ornament { color: rgba(201,168,76,0.5); }
+  body.candlelight .recipe-card, body.candlelight .recipe-item {
+    background: rgba(58,42,26,0.6) !important;
+    border-color: rgba(201,168,76,0.25) !important;
+    color: #e9d3a6;
+  }
+
+  /* ═══ XP + RANK ═══ */
+  .xp-box {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgba(139,26,26,0.25);
+    border-radius: 4px;
+    background: rgba(201,168,76,0.08);
+  }
+  .xp-rank {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .xp-bar {
+    height: 6px;
+    background: rgba(92,61,46,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+    transition: width 0.6s ease;
+    border-radius: 3px;
+  }
+  .xp-text {
+    font-family: 'IM Fell English', serif;
+    font-size: 10px;
+    color: var(--ink-faded);
+    text-align: center;
+    margin-top: 3px;
+    font-style: italic;
+  }
+  .xp-gain-toast {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: var(--leather-dark);
+    color: var(--gold-light);
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--gold-dark);
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    z-index: 9999;
+    animation: xpToast 1.8s ease forwards;
+    pointer-events: none;
+  }
+  @keyframes xpToast {
+    0% { transform: translateY(20px); opacity: 0; }
+    15% { transform: translateY(0); opacity: 1; }
+    80% { transform: translateY(-4px); opacity: 1; }
+    100% { transform: translateY(-30px); opacity: 0; }
+  }
+
+  /* ═══ FOLLOW BUTTON ═══ */
+  .follow-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    background: transparent;
+    border: 1px solid var(--leather);
+    color: var(--leather-dark);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .follow-btn:hover { background: var(--leather); color: var(--parchment-light); }
+  .follow-btn.followed {
+    background: var(--forest);
+    color: var(--parchment-light);
+    border-color: var(--forest);
+  }
+  .follow-btn.followed:hover { background: var(--accent); border-color: var(--accent); }
+  .follow-btn .material-symbols-outlined { font-size: 14px; }
+
+  /* ═══ CANDLELIGHT TOGGLE ═══ */
+  .candle-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-dark);
+    background: rgba(44,24,16,0.7);
+    color: var(--gold-light);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .candle-toggle:hover { background: var(--leather-dark); transform: scale(1.08); }
 </style>
 </head>
 <body>
+
+<!-- Candlelight toggle -->
+<button class="candle-toggle" id="candleToggle" onclick="toggleCandlelight()" title="Toggle candlelight mode">
+  <span class="material-symbols-outlined">light_mode</span>
+</button>
 
 <!-- ══════════════ THE BOOK ══════════════ -->
 <div class="book">
@@ -1137,6 +1301,11 @@
         <div style="margin-top:auto; padding-top:32px; text-align:center;">
           <p id="sidebar-count" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:13px;"></p>
           <p id="sidebar-user" style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:12px; margin-top:6px; opacity:0.7;"></p>
+          <div id="xp-box" class="xp-box" style="display:none;">
+            <div class="xp-rank" id="xp-rank">Apprentice</div>
+            <div class="xp-bar"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%;"></div></div>
+            <div class="xp-text" id="xp-text">0 XP</div>
+          </div>
           <button onclick="signOut()" class="btn-subtle" style="margin-top:12px; display:inline-flex; align-items:center; gap:4px; font-size:10px;">
             <span class="material-symbols-outlined" style="font-size:14px;">logout</span> Close Tome
           </button>
@@ -1572,10 +1741,15 @@ function handleAuthSession(session) {
     subscribeToRecipes(user.id);
     var ue = document.getElementById('sidebar-user');
     if (ue) ue.textContent = user.email;
+    loadMyXp();
+    loadFollowing();
   } else {
     recipes = [];
     if (recipesUnsub) { recipesUnsub(); recipesUnsub = null; }
     migrationChecked = false;
+    myXp = 0; following = new Set();
+    var xpBox = document.getElementById('xp-box');
+    if (xpBox) xpBox.style.display = 'none';
     document.getElementById('view-list').classList.remove('active');
     document.getElementById('view-detail').classList.remove('active');
     document.getElementById('view-login').classList.add('active');
@@ -1686,6 +1860,147 @@ var currentChapterFilter = null; // null=all, 'unsorted', or chapter_id
 var currentDifficultyFilter = null; // null, 'tavern', 'dungeon', 'dragon'
 // Ratings-given count (for achievement)
 var myRatingsGiven = 0;
+// Follow set: user_ids the current user follows
+var following = new Set();
+// Current user's XP
+var myXp = 0;
+
+// ─── Ranks ──────────────────────────────────────────────────
+var RANKS = [
+  { min: 0,    name: 'Apprentice' },
+  { min: 100,  name: 'Kitchen Hand' },
+  { min: 300,  name: 'Cook' },
+  { min: 700,  name: 'Sous Chef' },
+  { min: 1500, name: 'Chef' },
+  { min: 3000, name: 'Master Chef' },
+  { min: 6000, name: 'Archmage Chef' }
+];
+function rankFor(xp) {
+  xp = xp || 0;
+  var cur = RANKS[0], next = null;
+  for (var i = 0; i < RANKS.length; i++) {
+    if (xp >= RANKS[i].min) cur = RANKS[i];
+    else { next = RANKS[i]; break; }
+  }
+  return { current: cur, next: next };
+}
+function renderXp() {
+  var box = document.getElementById('xp-box');
+  if (!box) return;
+  if (!currentUser) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  var info = rankFor(myXp);
+  document.getElementById('xp-rank').textContent = info.current.name;
+  var fill = document.getElementById('xp-bar-fill');
+  var txt = document.getElementById('xp-text');
+  if (info.next) {
+    var span = info.next.min - info.current.min;
+    var into = myXp - info.current.min;
+    var pct = Math.max(0, Math.min(100, (into / span) * 100));
+    fill.style.width = pct + '%';
+    txt.textContent = myXp + ' / ' + info.next.min + ' XP';
+  } else {
+    fill.style.width = '100%';
+    txt.textContent = myXp + ' XP — Legend';
+  }
+}
+function awardXp(amount, reason) {
+  if (!currentUser || !amount) return;
+  var prevRank = rankFor(myXp).current.name;
+  myXp += amount;
+  renderXp();
+  showXpToast('+' + amount + ' XP' + (reason ? ' · ' + reason : ''));
+  var newRank = rankFor(myXp).current.name;
+  if (newRank !== prevRank) {
+    setTimeout(function() { showXpToast('⚔ Rank up: ' + newRank + '!'); }, 900);
+  }
+  sb.rpc('award_xp', { amount: amount }).then(function(res) {
+    if (!res.error && typeof res.data === 'number') { myXp = res.data; renderXp(); }
+  });
+}
+function showXpToast(msg) {
+  var t = document.createElement('div');
+  t.className = 'xp-gain-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 1900);
+}
+async function loadMyXp() {
+  if (!currentUser) return;
+  var res = await sb.from('profiles').select('xp').eq('id', currentUser.id).maybeSingle();
+  if (!res.error && res.data) { myXp = res.data.xp || 0; renderXp(); }
+}
+
+// ─── Follows ────────────────────────────────────────────────
+async function loadFollowing() {
+  if (!currentUser) return;
+  var res = await sb.from('follows').select('followed_id').eq('follower_id', currentUser.id);
+  following = new Set();
+  if (!res.error && res.data) res.data.forEach(function(r) { following.add(r.followed_id); });
+}
+async function toggleFollow(userId, btn) {
+  if (!currentUser || userId === currentUser.id) return;
+  if (following.has(userId)) {
+    await sb.from('follows').delete().eq('follower_id', currentUser.id).eq('followed_id', userId);
+    following.delete(userId);
+  } else {
+    var res = await sb.from('follows').insert({ follower_id: currentUser.id, followed_id: userId });
+    if (!res.error) { following.add(userId); awardXp(5, 'new ally'); }
+  }
+  if (btn) updateFollowBtn(btn, userId);
+  // re-render community tome if modal open
+  var modal = document.getElementById('modal-community');
+  if (modal && modal.classList.contains('active')) renderCommunityList();
+  // re-render detail social sections if open
+  if (currentRecipeId) {
+    var r = recipes.find(function(x) { return x.id === currentRecipeId; }) ||
+            (communityRecipes || []).find(function(x) { return x.id === currentRecipeId; });
+    if (r) renderSocialSections(r);
+  }
+}
+function updateFollowBtn(btn, userId) {
+  var on = following.has(userId);
+  btn.classList.toggle('followed', on);
+  btn.innerHTML = '<span class="material-symbols-outlined">' + (on ? 'how_to_reg' : 'person_add') + '</span>' + (on ? 'Following' : 'Follow');
+}
+function followBtnHtml(userId) {
+  if (!currentUser || userId === currentUser.id) return '';
+  var on = following.has(userId);
+  return '<button class="follow-btn ' + (on ? 'followed' : '') + '" onclick="event.stopPropagation(); toggleFollow(\'' + userId + '\', this);">' +
+    '<span class="material-symbols-outlined">' + (on ? 'how_to_reg' : 'person_add') + '</span>' +
+    (on ? 'Following' : 'Follow') + '</button>';
+}
+
+// ─── Seasonal Theme ─────────────────────────────────────────
+function applySeasonalTheme() {
+  var m = new Date().getMonth(); // 0=Jan
+  var season;
+  if (m >= 2 && m <= 4) season = 'spring';
+  else if (m >= 5 && m <= 7) season = 'summer';
+  else if (m >= 8 && m <= 10) season = 'autumn';
+  else season = 'winter';
+  document.body.classList.remove('season-spring','season-summer','season-autumn','season-winter');
+  document.body.classList.add('season-' + season);
+}
+
+// ─── Candlelight Mode ───────────────────────────────────────
+function toggleCandlelight() {
+  var on = document.body.classList.toggle('candlelight');
+  try { localStorage.setItem('candlelight', on ? '1' : '0'); } catch(e) {}
+  var btn = document.getElementById('candleToggle');
+  if (btn) btn.querySelector('.material-symbols-outlined').textContent = on ? 'dark_mode' : 'light_mode';
+}
+function initCandlelight() {
+  var on = false;
+  try { on = localStorage.getItem('candlelight') === '1'; } catch(e) {}
+  if (on) {
+    document.body.classList.add('candlelight');
+    var btn = document.getElementById('candleToggle');
+    if (btn) btn.querySelector('.material-symbols-outlined').textContent = 'dark_mode';
+  }
+}
+applySeasonalTheme();
+initCandlelight();
 
 function refreshFavourites() {
   if (!currentUser) return Promise.resolve();
@@ -1711,10 +2026,11 @@ function toggleFavourite(id, ev) {
   } else {
     favourites.add(id);
     sb.from('favourites').insert({ user_id: currentUser.id, recipe_id: id }).then(function(res) {
-      if (res.error) { favourites.delete(id); alert('Add favourite failed: ' + res.error.message); }
+      if (res.error) { favourites.delete(id); alert('Add favourite failed: ' + res.error.message); return; }
       if (currentView === 'list') renderRecipes();
       updateDetailFavStar();
       checkAchievements();
+      awardXp(2, 'favourite');
     });
   }
 }
@@ -2073,6 +2389,7 @@ function renderSocialSections(r) {
   if (!isOwner) {
     var author = profileLabel(r._ownerId);
     tagEl.innerHTML += '<span class="badge badge-shared"><span class="material-symbols-outlined">' + (isCollab ? 'group' : 'person') + '</span> ' + esc(author) + '</span>';
+    if (r._ownerId) tagEl.innerHTML += followBtnHtml(r._ownerId);
   }
 
   // Share section — owner only
@@ -2125,6 +2442,7 @@ function forkRecipe(id) {
     copy._visibility = 'private';
     recipes.push(copy);
     bumpCounter('forked');
+    awardXp(10, 'scroll copied');
     alert('Copied to thy tome!');
     openRecipeDetail(copy.id);
   });
@@ -2185,6 +2503,7 @@ var timerAudioCtx = null;
 
 function startTimer(seconds, encodedLabel) {
   bumpCounter('timerStarted');
+  awardXp(3, 'dish cooking');
   var label = decodeURIComponent(encodedLabel);
   var id = 't' + Date.now() + '-' + Math.floor(Math.random() * 1000);
   activeTimers[id] = {
@@ -2292,6 +2611,7 @@ function rollTheDice() {
   var pool = recipes.filter(function(r) { return !r._external; });
   if (!pool.length) { alert('The tome is empty. Inscribe some recipes first!'); return; }
   bumpCounter('diceRolled');
+  awardXp(1, 'dice rolled');
   var overlay = document.getElementById('dice-overlay');
   var big = document.getElementById('dice-big');
   var caption = document.getElementById('dice-caption');
@@ -2740,6 +3060,7 @@ function saveRecipe() {
   };
 
   var editId = document.getElementById('editId').value;
+  var isNew = !editId;
   var id = editId || genId();
   data.id = id;
   if (editId) {
@@ -2757,6 +3078,7 @@ function saveRecipe() {
       setTimeout(function() { openRecipeDetail(editId); }, 100);
     }
     checkAchievements();
+    if (isNew) awardXp(50, 'recipe inscribed');
   }).catch(function(e) {
     alert('Save failed: ' + (e.message || e));
   });
@@ -3329,8 +3651,9 @@ function toggleVisibility(makePublic) {
       document.getElementById('visibility-toggle').checked = (r._visibility === 'public');
       return;
     }
+    var wasPrivate = (r._visibility !== 'public');
     r._visibility = newVis;
-    if (makePublic) checkAchievements();
+    if (makePublic) { checkAchievements(); if (wasPrivate) awardXp(30, 'scroll shared'); }
     document.getElementById('visibility-label').textContent = makePublic ? 'Public (anyone can find it)' : 'Make public';
     document.getElementById('copy-link-btn').style.display = makePublic ? 'inline-flex' : 'none';
     document.getElementById('share-status').textContent = makePublic ? 'This scroll is now visible in the Community Tome.' : 'This scroll is now private.';
@@ -3394,6 +3717,7 @@ function addCollaborator() {
       status.textContent = 'Added!';
       document.getElementById('collab-email').value = '';
       renderCollaborators(currentRecipeId);
+      awardXp(10, 'new co-author');
     });
   });
 }
@@ -3440,7 +3764,7 @@ function renderRatings(r) {
     // Fetch my rating
     sb.from('recipe_ratings').select('*').eq('recipe_id', r.id).eq('user_id', currentUser.id).maybeSingle().then(function(res) {
       var mine = res.data;
-      myRatingCache = { value: mine ? mine.rating : 0, review: mine ? (mine.review || '') : '' };
+      myRatingCache = { value: mine ? mine.rating : 0, review: mine ? (mine.review || '') : '', existing: !!mine };
       document.getElementById('my-star-row').innerHTML = starRowHtml(myRatingCache.value, 'setMyRating');
       document.getElementById('my-review').value = myRatingCache.review;
       document.getElementById('delete-rating-btn').style.display = mine ? 'inline-flex' : 'none';
@@ -3481,8 +3805,11 @@ function submitRating() {
     review: review || null,
     updated_at: new Date().toISOString()
   };
+  var wasNew = !myRatingCache.existing;
   sb.from('recipe_ratings').upsert(row).then(function(res) {
     if (res.error) { alert('Rating failed: ' + res.error.message); return; }
+    if (wasNew) awardXp(5, 'review posted');
+    myRatingCache.existing = true;
     refreshRatingsGivenCount();
     refreshRatingsAgg().then(function() {
       var r = recipes.find(function(x) { return x.id === currentRecipeId; }) ||
@@ -3530,6 +3857,12 @@ function renderCommunityList() {
            (r.category || '').toLowerCase().includes(q) ||
            (r.ingredients || []).some(function(i) { return (i || '').toLowerCase().includes(q); });
   });
+  // Prioritize recipes from followed adventurers
+  list.sort(function(a, b) {
+    var af = following.has(a._ownerId) ? 1 : 0;
+    var bf = following.has(b._ownerId) ? 1 : 0;
+    return bf - af;
+  });
   var el = document.getElementById('community-list');
   if (!list.length) {
     el.innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">' +
@@ -3549,10 +3882,13 @@ function renderCommunityList() {
     var isFav = favourites.has(r.id);
     var star = '<button class="fav-star inline' + (isFav ? ' filled' : '') + '" onclick="toggleFavourite(\'' + r.id + '\',event)" style="float:right;"><span class="material-symbols-outlined">star</span></button>';
     var diff = r.difficulty ? ' ' + diffBadge(r.difficulty) : '';
+    var followedMark = following.has(r._ownerId) ? '<span class="material-symbols-outlined" style="font-size:14px; color:var(--forest); vertical-align:middle;" title="You follow this adventurer">how_to_reg</span> ' : '';
+    var followBtn = followBtnHtml(r._ownerId);
     return '<div class="community-card" onclick="openCommunityRecipe(\'' + r.id + '\')">' +
       star +
-      '<div class="community-card-title">' + esc(r.name) + diff + '</div>' +
+      '<div class="community-card-title">' + followedMark + esc(r.name) + diff + '</div>' +
       '<div class="community-card-meta">' + meta.join(' · ') + (ratingBit ? ' · ' + ratingBit : '') + '</div>' +
+      (followBtn ? '<div style="margin-top:8px;">' + followBtn + '</div>' : '') +
       '</div>';
   }).join('');
 }
