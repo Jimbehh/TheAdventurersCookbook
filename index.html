@@ -1177,6 +1177,27 @@
   .follow-btn.followed:hover { background: var(--accent); border-color: var(--accent); }
   .follow-btn .material-symbols-outlined { font-size: 14px; }
 
+  /* ═══ ADVENTURER ROW ═══ */
+  .adv-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(139,26,26,0.18);
+    border-radius: 4px;
+    background: rgba(201,168,76,0.06);
+    margin-bottom: 8px;
+  }
+  .adv-row + .adv-row { margin-top: 0; }
+  .adv-name { font-family: 'Cinzel', serif; font-size: 14px; color: var(--ink); flex: 1; min-width: 0; }
+  .adv-name small { display: block; font-family: 'IM Fell English', serif; font-style: italic; color: var(--ink-faded); font-size: 11px; font-weight: normal; margin-top: 2px; }
+  .adv-meta {
+    font-family: 'IM Fell English', serif; font-size: 12px; color: var(--ink-faded);
+    text-align: right; white-space: nowrap; margin-right: 8px;
+  }
+  .adv-meta strong { color: var(--accent); font-style: normal; }
+  body.candlelight .adv-row { background: rgba(201,168,76,0.08) !important; border-color: rgba(201,168,76,0.25) !important; }
+  body.candlelight .adv-name { color: #f0d6a0 !important; }
+  body.candlelight .adv-meta strong { color: #f4a868 !important; }
+
   /* ═══ CANDLELIGHT TOGGLE ═══ */
   .candle-toggle {
     position: fixed;
@@ -1306,9 +1327,14 @@
               <span class="material-symbols-outlined" style="font-size:16px;">shopping_cart</span> Provisions
             </button>
           </div>
-          <button onclick="openCommunityTome()" class="btn-tome" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
-            <span class="material-symbols-outlined" style="font-size:16px;">public</span> Community Tome
-          </button>
+          <div style="display:flex; gap:8px;">
+            <button onclick="openCommunityTome()" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
+              <span class="material-symbols-outlined" style="font-size:16px;">public</span> Community Tome
+            </button>
+            <button onclick="openAdventurers()" class="btn-tome" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px;">
+              <span class="material-symbols-outlined" style="font-size:16px;">groups</span> Adventurers
+            </button>
+          </div>
         </div>
 
         <hr class="ruled-line"/>
@@ -1754,9 +1780,39 @@
         <span class="material-symbols-outlined" style="color:var(--ink-faded); font-size:18px;">search</span>
         <input id="communitySearch" class="tome-input" style="border:none; padding:0; background:transparent;" placeholder="Search community scrolls..." oninput="renderCommunityList()" type="text"/>
       </div>
+      <div id="community-filter-row" style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="diff-filter-chip active" data-cfilter="all" onclick="setCommunityFilter('all')">All</button>
+        <button class="diff-filter-chip" data-cfilter="followed" onclick="setCommunityFilter('followed')">Followed</button>
+        <button class="diff-filter-chip" data-cfilter="suggested" onclick="setCommunityFilter('suggested')">Suggested</button>
+      </div>
     </div>
     <div id="community-list" style="flex:1; overflow-y:auto;">
       <p style="text-align:center; color:var(--ink-faded); font-family:'IM Fell English',serif; font-style:italic; padding:20px;">Gathering scrolls from the realm...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADVENTURERS MODAL ════════════════════════════════════ -->
+<div id="modal-adventurers" class="modal-overlay">
+  <div class="modal-scroll" style="max-width:640px; display:flex; flex-direction:column; max-height:90vh;">
+    <div style="flex-shrink:0;">
+      <div style="display:flex; justify-content:flex-end;">
+        <button onclick="hideModal('modal-adventurers')" style="background:none; border:none; cursor:pointer; color:var(--ink-faded);">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div style="text-align:center; margin-bottom:16px;">
+        <h2 style="font-family:'Cinzel Decorative',cursive; font-size:22px; color:var(--accent);">Fellow Adventurers</h2>
+        <div class="flourish">&#8212; &#10043; &#8212;</div>
+        <p style="font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-faded); font-size:14px; margin-top:4px;">Find allies to follow.</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; border:1px solid var(--gold-dark); padding:8px 12px; margin-bottom:12px;">
+        <span class="material-symbols-outlined" style="color:var(--ink-faded); font-size:18px;">search</span>
+        <input id="adventurersSearch" class="tome-input" style="border:none; padding:0; background:transparent;" placeholder="Search by name or email..." oninput="renderAdventurers()" type="text"/>
+      </div>
+    </div>
+    <div id="adventurers-list" style="flex:1; overflow-y:auto;">
+      <p style="text-align:center; color:var(--ink-faded); font-family:'IM Fell English',serif; font-style:italic; padding:20px;">Summoning the realm's heroes...</p>
     </div>
   </div>
 </div>
@@ -2003,6 +2059,8 @@ async function toggleFollow(userId, btn) {
   // re-render community tome if modal open
   var modal = document.getElementById('modal-community');
   if (modal && modal.classList.contains('active')) renderCommunityList();
+  var advModal = document.getElementById('modal-adventurers');
+  if (advModal && advModal.classList.contains('active')) renderAdventurers();
   // re-render detail social sections if open
   if (currentRecipeId) {
     var r = recipes.find(function(x) { return x.id === currentRecipeId; }) ||
@@ -3687,7 +3745,7 @@ function hideModal(id) {
 }
 
 // Close modals on backdrop click
-['modal-recipe','modal-import','modal-shopping','modal-community','modal-quest'].forEach(function(id) {
+['modal-recipe','modal-import','modal-shopping','modal-community','modal-quest','modal-adventurers'].forEach(function(id) {
   var el = document.getElementById(id);
   if (el) el.addEventListener('click', function(e) { if (e.target === el) hideModal(id); });
 });
@@ -3887,10 +3945,20 @@ function deleteMyRating() {
 
 // ─── Social: Community Tome ───────────────────────────────────
 var communityRecipes = [];
+var communityFilter = 'all'; // all | followed | suggested
+
+function setCommunityFilter(f) {
+  communityFilter = f;
+  document.querySelectorAll('#community-filter-row .diff-filter-chip').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.cfilter === f);
+  });
+  renderCommunityList();
+}
 
 function openCommunityTome() {
   showModal('modal-community');
   document.getElementById('communitySearch').value = '';
+  setCommunityFilter('all');
   document.getElementById('community-list').innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">Gathering scrolls from the realm...</p>';
   sb.from('recipes').select('*').eq('visibility', 'public').neq('user_id', currentUser.id).then(function(res) {
     if (res.error) { document.getElementById('community-list').innerHTML = 'Error: ' + esc(res.error.message); return; }
@@ -3903,11 +3971,27 @@ function openCommunityTome() {
 
 function renderCommunityList() {
   var q = (document.getElementById('communitySearch').value || '').toLowerCase();
+  // Suggested = top public-recipe authors that user does NOT yet follow
+  var suggestedAuthors = null;
+  if (communityFilter === 'suggested') {
+    var counts = {};
+    communityRecipes.forEach(function(r) {
+      if (!r._ownerId || following.has(r._ownerId)) return;
+      counts[r._ownerId] = (counts[r._ownerId] || 0) + 1;
+    });
+    var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 5);
+    suggestedAuthors = new Set(sorted);
+  }
   var list = communityRecipes.filter(function(r) {
-    if (!q) return true;
-    return (r.name || '').toLowerCase().includes(q) ||
-           (r.category || '').toLowerCase().includes(q) ||
-           (r.ingredients || []).some(function(i) { return (i || '').toLowerCase().includes(q); });
+    if (q) {
+      var hit = (r.name || '').toLowerCase().includes(q) ||
+                (r.category || '').toLowerCase().includes(q) ||
+                (r.ingredients || []).some(function(i) { return (i || '').toLowerCase().includes(q); });
+      if (!hit) return false;
+    }
+    if (communityFilter === 'followed') return following.has(r._ownerId);
+    if (communityFilter === 'suggested') return suggestedAuthors.has(r._ownerId);
+    return true;
   });
   // Prioritize recipes from followed adventurers
   list.sort(function(a, b) {
@@ -3917,8 +4001,12 @@ function renderCommunityList() {
   });
   var el = document.getElementById('community-list');
   if (!list.length) {
-    el.innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">' +
-      (communityRecipes.length ? 'No scrolls match thy query.' : 'The community tome is empty. Be the first to share!') + '</p>';
+    var msg;
+    if (!communityRecipes.length) msg = 'The community tome is empty. Be the first to share!';
+    else if (communityFilter === 'followed') msg = 'No scrolls from adventurers you follow yet. Visit the Adventurers directory to find allies.';
+    else if (communityFilter === 'suggested') msg = 'No suggestions right now — try the Adventurers directory.';
+    else msg = 'No scrolls match thy query.';
+    el.innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">' + msg + '</p>';
     return;
   }
   el.innerHTML = list.map(function(r) {
@@ -3954,6 +4042,72 @@ function openCommunityRecipe(id) {
   }
   hideModal('modal-community');
   openRecipeDetail(id);
+}
+
+// ─── Adventurers Directory ────────────────────────────────────
+var adventurers = []; // [{id, email, display_name, xp, recipeCount}]
+
+function openAdventurers() {
+  showModal('modal-adventurers');
+  document.getElementById('adventurersSearch').value = '';
+  document.getElementById('adventurers-list').innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">Summoning the realm\'s heroes...</p>';
+
+  Promise.all([
+    sb.from('profiles').select('id,email,display_name,xp'),
+    sb.from('recipes').select('user_id').eq('visibility', 'public')
+  ]).then(function(results) {
+    var pRes = results[0], rRes = results[1];
+    if (pRes.error) { document.getElementById('adventurers-list').innerHTML = 'Error: ' + esc(pRes.error.message); return; }
+    var counts = {};
+    (rRes.data || []).forEach(function(row) { counts[row.user_id] = (counts[row.user_id] || 0) + 1; });
+    adventurers = (pRes.data || [])
+      .filter(function(p) { return p.id !== currentUser.id; })
+      .map(function(p) {
+        return {
+          id: p.id,
+          email: p.email || '',
+          display_name: p.display_name || (p.email ? p.email.split('@')[0] : 'adventurer'),
+          xp: p.xp || 0,
+          recipeCount: counts[p.id] || 0
+        };
+      })
+      .sort(function(a, b) {
+        // Followed first, then by recipe count, then xp
+        var af = following.has(a.id) ? 1 : 0;
+        var bf = following.has(b.id) ? 1 : 0;
+        if (af !== bf) return bf - af;
+        if (a.recipeCount !== b.recipeCount) return b.recipeCount - a.recipeCount;
+        return b.xp - a.xp;
+      });
+    renderAdventurers();
+  });
+}
+
+function renderAdventurers() {
+  var q = (document.getElementById('adventurersSearch').value || '').toLowerCase();
+  var list = adventurers.filter(function(a) {
+    if (!q) return true;
+    return a.display_name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
+  });
+  var el = document.getElementById('adventurers-list');
+  if (!list.length) {
+    el.innerHTML = '<p style="text-align:center; color:var(--ink-faded); font-family:\'IM Fell English\',serif; font-style:italic; padding:20px;">' +
+      (adventurers.length ? 'No adventurers match thy query.' : 'No other adventurers in the realm yet.') + '</p>';
+    return;
+  }
+  el.innerHTML = list.map(function(a) {
+    var rank = rankFor(a.xp).current.name;
+    return '<div class="adv-row">' +
+      '<div class="adv-name">' + esc(a.display_name) +
+        '<small>' + esc(a.email) + '</small>' +
+      '</div>' +
+      '<div class="adv-meta">' +
+        '<strong>' + esc(rank) + '</strong> · ' + a.xp + ' XP<br>' +
+        a.recipeCount + ' public scroll' + (a.recipeCount !== 1 ? 's' : '') +
+      '</div>' +
+      followBtnHtml(a.id) +
+      '</div>';
+  }).join('');
 }
 
 // ─── Deep link: ?recipe=<id> ──────────────────────────────────
