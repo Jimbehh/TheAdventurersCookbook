@@ -1017,26 +1017,78 @@
     background-image:
       radial-gradient(ellipse at 20% 40%, rgba(201,120,40,0.22) 0%, transparent 55%),
       radial-gradient(ellipse at 80% 60%, rgba(139,60,20,0.18) 0%, transparent 55%);
+    /* Override ink + parchment vars so cascading colors flip */
+    --ink: #f0d6a0;
+    --ink-light: #d9bf86;
+    --ink-faded: #b89a66;
+    --parchment: #2a1d10;
+    --parchment-light: #3a2a1a;
+    --parchment-dark: #1f140a;
+    --leather: #d9bf86;
+    --leather-dark: #f0d6a0;
+    --accent: #f4a868;
+    --accent-light: #ffc88c;
+    color: #f0d6a0;
   }
   body.candlelight .page {
     background: #2a1d10 !important;
-    color: #e9d3a6;
+    color: #f0d6a0 !important;
     box-shadow: inset 0 0 80px rgba(0,0,0,0.6), 0 0 40px rgba(201,120,40,0.12);
   }
+  body.candlelight .page * { color: inherit; }
   body.candlelight .page-border { border-color: rgba(201,168,76,0.35) !important; }
-  body.candlelight h1, body.candlelight h2, body.candlelight h3, body.candlelight h4 { color: #f0d6a0; }
-  body.candlelight .section-header { color: #e9d3a6; }
+  body.candlelight h1, body.candlelight h2, body.candlelight h3, body.candlelight h4 { color: #f6dfa8 !important; }
+  body.candlelight .section-header,
+  body.candlelight .index-num,
+  body.candlelight .index-name,
+  body.candlelight .index-page,
+  body.candlelight .index-detail,
+  body.candlelight .step-text,
+  body.candlelight .ing-name,
+  body.candlelight .ing-qty,
+  body.candlelight .flourish,
+  body.candlelight p, body.candlelight span, body.candlelight label, body.candlelight li, body.candlelight div {
+    color: #f0d6a0;
+  }
+  body.candlelight .index-detail,
+  body.candlelight .review-text,
+  body.candlelight .review-author { color: #c9aa72 !important; }
   body.candlelight input, body.candlelight textarea, body.candlelight select {
-    background: #3a2a1a !important; color: #e9d3a6 !important;
+    background: #3a2a1a !important; color: #f0d6a0 !important;
     border-color: rgba(201,168,76,0.3) !important;
   }
-  body.candlelight .btn-subtle { color: #e9d3a6; }
-  body.candlelight .corner-ornament { color: rgba(201,168,76,0.5); }
-  body.candlelight .recipe-card, body.candlelight .recipe-item {
-    background: rgba(58,42,26,0.6) !important;
-    border-color: rgba(201,168,76,0.25) !important;
-    color: #e9d3a6;
+  body.candlelight input::placeholder,
+  body.candlelight textarea::placeholder { color: #8a7250 !important; }
+  body.candlelight .btn-subtle { color: #f0d6a0 !important; border-color: rgba(201,168,76,0.4) !important; }
+  body.candlelight .btn-tome { background: #4a2f18 !important; color: #f6dfa8 !important; border-color: rgba(201,168,76,0.45) !important; }
+  body.candlelight .btn-accent { background: #8b3a1a !important; color: #ffefd0 !important; }
+  body.candlelight .corner-ornament { color: rgba(201,168,76,0.5) !important; }
+  body.candlelight .recipe-card, body.candlelight .recipe-item, body.candlelight .index-entry {
+    background: rgba(58,42,26,0.4) !important;
+    border-color: rgba(201,168,76,0.2) !important;
+    color: #f0d6a0;
   }
+  body.candlelight .modal-content,
+  body.candlelight .modal-body { background: #2a1d10 !important; color: #f0d6a0 !important; }
+  body.candlelight .modal-content * { color: #f0d6a0; }
+  body.candlelight .modal-content input,
+  body.candlelight .modal-content textarea,
+  body.candlelight .modal-content select { color: #f0d6a0 !important; }
+  body.candlelight .badge { background: rgba(201,168,76,0.15) !important; color: #f0d6a0 !important; border-color: rgba(201,168,76,0.4) !important; }
+  body.candlelight .badge-public { background: rgba(74,128,66,0.3) !important; color: #c8e8b8 !important; }
+  body.candlelight .badge-shared { background: rgba(139,26,26,0.3) !important; color: #ffc8a8 !important; }
+  body.candlelight .community-card { background: rgba(58,42,26,0.5) !important; border-color: rgba(201,168,76,0.25) !important; color: #f0d6a0; }
+  body.candlelight .community-card * { color: #f0d6a0; }
+  body.candlelight .collab-chip { background: rgba(201,168,76,0.15) !important; color: #f0d6a0 !important; }
+  body.candlelight .chapter-chip { background: rgba(201,168,76,0.12) !important; color: #f0d6a0 !important; border-color: rgba(201,168,76,0.3) !important; }
+  body.candlelight .chapter-chip.active { background: #8b3a1a !important; color: #ffefd0 !important; }
+  body.candlelight .diff-filter-chip { color: #f0d6a0 !important; border-color: rgba(201,168,76,0.3) !important; }
+  body.candlelight .timer-panel { background: #2a1d10 !important; color: #f0d6a0 !important; border-color: rgba(201,168,76,0.3) !important; }
+  body.candlelight .xp-box { background: rgba(201,168,76,0.1) !important; }
+  body.candlelight .xp-rank { color: #f4a868 !important; }
+  body.candlelight .xp-text { color: #c9aa72 !important; }
+  body.candlelight .follow-btn { color: #f0d6a0; border-color: rgba(201,168,76,0.4); }
+  body.candlelight .follow-btn:hover { background: rgba(201,168,76,0.2); color: #ffefd0; }
 
   /* ═══ XP + RANK ═══ */
   .xp-box {
